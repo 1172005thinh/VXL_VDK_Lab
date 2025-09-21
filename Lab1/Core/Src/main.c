@@ -75,7 +75,7 @@ const PINMAP pinMap[] = {
     {_11_GPIO_Port, _11_Pin},  	// indexPin = 11
     {_12_GPIO_Port, _12_Pin},  	// indexPin = 12
 	//PA13 to PA14 are reserved
-	//PA15
+	//PA15 for LED-SYS
 	{_13_GPIO_Port, _13_Pin},  	// indexPin = 13
 	//PB0 to PB15
     {_14_GPIO_Port, _14_Pin},  	// indexPin = 14
@@ -96,7 +96,7 @@ const PINMAP pinMap[] = {
     {_29_GPIO_Port, _29_Pin},  	// indexPin = 29
 };
 
-const int segMapAnode[10] = {
+const uint8_t segMapAnode[10] = {
 	//abcdefg
 	0b0000001, //0
 	0b1001111, //1
@@ -176,6 +176,17 @@ void toggle6Pin(int indexPin_1, int indexPin_2, int indexPin_3, int indexPin_4, 
 	togglePin(indexPin_6, state_6);
 }
 
+void toggle7Pin(int indexPin_1, int indexPin_2, int indexPin_3, int indexPin_4, int indexPin_5, int indexPin_6, int indexPin_7,
+				bool state_1, bool state_2, bool state_3, bool state_4, bool state_5, bool state_6, bool state_7) {
+	togglePin(indexPin_1, state_1);
+	togglePin(indexPin_2, state_2);
+	togglePin(indexPin_3, state_3);
+	togglePin(indexPin_4, state_4);
+	togglePin(indexPin_5, state_5);
+	togglePin(indexPin_6, state_6);
+	togglePin(indexPin_7, state_7);
+}
+
 void traffic3_4(int indexPin_1, int indexPin_2, int indexPin_3, int indexPin_4, int indexPin_5, int indexPin_6,
 				int time_1_4, int time_2_5, int time_3_6,
 				int state, int counter) {
@@ -230,8 +241,9 @@ void traffic3_4(int indexPin_1, int indexPin_2, int indexPin_3, int indexPin_4, 
 }
 
 void seg7Anode_1(int indexPin_1, int indexPin_2, int indexPin_3, int indexPin_4, int indexPin_5, int indexPin_6, int indexPin_7, 
-				const int state[10], int num,
+				const uint8_t state[10], int num,
 				int time) {
+	toggle7Pin(indexPin_1, indexPin_2, indexPin_3, indexPin_4, indexPin_5, indexPin_6, indexPin_7, 1, 1, 1, 1, 1, 1, 1);
 	togglePin(indexPin_1, state[num] & 0b1000000);
 	togglePin(indexPin_2, state[num] & 0b0100000);
 	togglePin(indexPin_3, state[num] & 0b0010000);
@@ -239,7 +251,21 @@ void seg7Anode_1(int indexPin_1, int indexPin_2, int indexPin_3, int indexPin_4,
 	togglePin(indexPin_5, state[num] & 0b0000100);
 	togglePin(indexPin_6, state[num] & 0b0000010);
 	togglePin(indexPin_7, state[num] & 0b0000001);
-	HAL_Delay(time*1000);
+	//HAL_Delay(time*1000);
+}
+
+void seg7Anode_2(int indexPin_1, int indexPin_2, int indexPin_3, int indexPin_4, int indexPin_5, int indexPin_6, int indexPin_7, 
+				const uint8_t state[10], int num,
+				int time) {
+	toggle7Pin(indexPin_1, indexPin_2, indexPin_3, indexPin_4, indexPin_5, indexPin_6, indexPin_7, 1, 1, 1, 1, 1, 1, 1);
+	togglePin(indexPin_1, state[num] & 0b1000000);
+	togglePin(indexPin_2, state[num] & 0b0100000);
+	togglePin(indexPin_3, state[num] & 0b0010000);
+	togglePin(indexPin_4, state[num] & 0b0001000);
+	togglePin(indexPin_5, state[num] & 0b0000100);
+	togglePin(indexPin_6, state[num] & 0b0000010);
+	togglePin(indexPin_7, state[num] & 0b0000001);
+	//HAL_Delay(time*1000);
 }
 
 void display7SEG(int num) {
@@ -248,6 +274,88 @@ void display7SEG(int num) {
 		return;
 	}
 	seg7Anode_1(14, 15, 16, 17, 18, 19, 20, segMapAnode, num, 1);
+	HAL_Delay(1000);
+}
+
+void traffic3_7seg_4(int indexPin_1, int indexPin_2, int indexPin_3, int indexPin_4, int indexPin_5, int indexPin_6,
+					int indexPin_7, int indexPin_8, int indexPin_9, int indexPin_10, int indexPin_11, int indexPin_12, int indexPin_13,
+					int indexPin_14, int indexPin_15, int indexPin_16, int indexPin_17, int indexPin_18, int indexPin_19, int indexPin_20,
+					int time_1_4, int time_2_5, int time_3_6,
+					int state, int counter) {
+	//safety check -> time_1_4 == time_2_5 + time_3_6
+	if (time_1_4 != time_2_5 + time_3_6) {
+		return;
+	}
+	bool led_sys = 0;
+	while (1)
+	{		
+		if (led_sys == 0) {
+			togglePin(13, 1);
+			led_sys = 1;
+		} else if (led_sys == 1) {
+			togglePin(13, 0);
+			led_sys = 0;
+		}
+		switch (state)
+		{
+			case 0: // RED GREEN
+			toggle6Pin(indexPin_1, indexPin_2, indexPin_3, indexPin_4, indexPin_5, indexPin_6, 1, 0, 0, 0, 0, 1);
+			int timer_1 = time_1_4 - counter - 1;
+			int timer_2 = time_3_6 - counter - 1;
+			seg7Anode_1(indexPin_7, indexPin_8, indexPin_9, indexPin_10, indexPin_11, indexPin_12, indexPin_13, segMapAnode, timer_1, 1);
+			seg7Anode_2(indexPin_14, indexPin_15, indexPin_16, indexPin_17, indexPin_18, indexPin_19, indexPin_20, segMapAnode, timer_2 , 1);
+			break;
+
+			case 1: // RED YELLOW
+			toggle6Pin(indexPin_1, indexPin_2, indexPin_3, indexPin_4, indexPin_5, indexPin_6, 1, 0, 0, 0, 1, 0);
+			timer_1 = time_2_5 - counter - 1;
+			timer_2 = time_2_5 - counter - 1;
+			seg7Anode_1(indexPin_7, indexPin_8, indexPin_9, indexPin_10, indexPin_11, indexPin_12, indexPin_13, segMapAnode, time_2_5 - counter - 1, 1);
+			seg7Anode_2(indexPin_14, indexPin_15, indexPin_16, indexPin_17, indexPin_18, indexPin_19, indexPin_20, segMapAnode, time_2_5 - counter - 1, 1);
+			break;
+
+			case 2: // GREEN RED
+			toggle6Pin(indexPin_1, indexPin_2, indexPin_3, indexPin_4, indexPin_5, indexPin_6, 0, 0, 1, 1, 0, 0);
+			timer_1 = time_3_6 - counter - 1;
+			timer_2 = time_1_4 - counter - 1;
+			seg7Anode_1(indexPin_7, indexPin_8, indexPin_9, indexPin_10, indexPin_11, indexPin_12, indexPin_13, segMapAnode, time_3_6 - counter - 1, 1);
+			seg7Anode_2(indexPin_14, indexPin_15, indexPin_16, indexPin_17, indexPin_18, indexPin_19, indexPin_20, segMapAnode, time_1_4 - counter - 1, 1);
+			break;
+			
+			case 3: // YELLOW RED
+			toggle6Pin(indexPin_1, indexPin_2, indexPin_3, indexPin_4, indexPin_5, indexPin_6, 0, 1, 0, 1, 0, 0);
+			timer_1 = time_2_5 - counter - 1;
+			timer_2 = time_2_5 - counter - 1;
+			seg7Anode_1(indexPin_7, indexPin_8, indexPin_9, indexPin_10, indexPin_11, indexPin_12, indexPin_13, segMapAnode, time_2_5 - counter - 1, 1);
+			seg7Anode_2(indexPin_14, indexPin_15, indexPin_16, indexPin_17, indexPin_18, indexPin_19, indexPin_20, segMapAnode, time_2_5 - counter - 1, 1);
+			break;
+
+			default: // safety fallback -> all OFF and reset
+			toggle6Pin(indexPin_1, indexPin_2, indexPin_3, indexPin_4, indexPin_5, indexPin_6, 0, 0, 0, 0, 0, 0);
+			seg7Anode_1(indexPin_7, indexPin_8, indexPin_9, indexPin_10, indexPin_11, indexPin_12, indexPin_13, segMapAnode, 0, 1);
+			seg7Anode_2(indexPin_14, indexPin_15, indexPin_16, indexPin_17, indexPin_18, indexPin_19, indexPin_20, segMapAnode, 0, 1);
+			state = 0;
+			counter = 0;
+			break;
+		}
+		
+		HAL_Delay(1000);
+		counter++;
+
+		if (state == 0 && counter >= time_3_6) {
+			state = 1;
+			counter = 0;
+		} else if (state == 1 && counter >= time_2_5) {
+			state = 2;
+			counter = 0;
+		} else if (state == 2 && counter >= time_3_6) {
+			state = 3;
+			counter = 0;
+		} else if (state == 3 && counter >= time_2_5) {
+			state = 0;
+			counter = 0;
+		}
+	}
 }
 		
 /* USER CODE END 0 */
@@ -324,11 +432,15 @@ int main(void)
 	traffic3_4(1, 2, 3, 4, 5, 6, 5, 2, 3, status, counter);
 	*/
 	//Ex4
-	///*
+	/*
 	if (counter >= 10) {
 		counter = 0;
 	}
 	display7SEG(counter++);
+	*/
+	//Ex5
+	///*
+	traffic3_7seg_4(1, 2 ,3 ,4 ,5, 6, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 5, 2, 3, status, counter);
 	//*/
     /* USER CODE END WHILE */
 
