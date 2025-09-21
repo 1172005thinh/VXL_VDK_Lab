@@ -395,6 +395,39 @@ void clearNumberOnClock(int num) {
 	};
 	togglePin(pinMapClk[num], 0);
 }
+
+void runClk(int speedFactor, int time) {
+    int sec = 0;
+    int min = 0;
+    int hour = 0;
+	bool led_sys = 0;
+
+    while (1) {
+		led_sys = !led_sys;
+		togglePin(13, led_sys);
+		
+		clearAllClock();
+
+		setNumberOnClock(sec / 5);
+		setNumberOnClock(min / 5);
+		setNumberOnClock(hour % 12);
+
+		HAL_Delay(time*1000);
+		sec += speedFactor;
+		
+		while (sec >= 60) {
+			sec -= 60;
+			min++;
+			if (min >= 60) {
+				min = 0;
+				hour++;
+				if (hour >= 12) {
+					hour = 0;
+				}
+			}
+		}
+	}
+}
 		
 /* USER CODE END 0 */
 
@@ -512,7 +545,7 @@ int main(void)
 	HAL_Delay(1000);
 	*/
 	//Ex9
-	///*
+	/*
 	if (led_sys == 0) {
 		togglePin(13, 1);
 		led_sys = 1;
@@ -526,6 +559,11 @@ int main(void)
 	clearNumberOnClock(0);
 	clearNumberOnClock(10);
 	HAL_Delay(1000);
+	*/
+	//Ex10
+	///*
+	//Adjust clock speed by changing parameters. Format: speedFactor (x1 or x2), timePerSec = 1 (sec)
+	runClk(1, 1);
 	//*/
     /* USER CODE END WHILE */
 
