@@ -81,6 +81,53 @@ void togglePin(int indexPin, bool state) {
 	}
 	HAL_GPIO_WritePin(pinMap[idx].port, pinMap[idx].pin, (state) ? GPIO_PIN_SET : GPIO_PIN_RESET);
 }
+
+void traffic3_1(int indexPin_1, int indexPin_2, int indexPin_3, int time_1, int time_2, int time_3, int state, int counter) {
+	while (1)
+	{
+		switch (state) {
+			case 0: // RED
+			togglePin(1, 1);
+			togglePin(2, 0);
+			togglePin(3, 0);
+			break;
+
+			case 1: // YELLOW
+			togglePin(1, 0);
+			togglePin(2, 1);
+			togglePin(3, 0);
+			break;
+
+			case 2: // GREEN
+			togglePin(1, 0);
+			togglePin(2, 0);
+			togglePin(3, 1);
+			break;
+
+			default: // safety fallback -> all OFF and reset
+			togglePin(1, 0);
+			togglePin(2, 0);
+			togglePin(3, 0);
+			state = 0;
+			counter = 0;
+			break;
+		}
+	
+		HAL_Delay(1000);
+		counter++;
+
+		if (state == 0 && counter >= 5) {
+			state = 1;
+			counter = 0;
+		} else if (state == 1 && counter >= 2) {
+			state = 2;
+			counter = 0;
+		} else if (state == 2 && counter >= 3) {
+			state = 0;
+			counter = 0;
+		}
+	}
+}
 /* USER CODE END 0 */
 
 /**
@@ -119,6 +166,7 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   int status = 0;
+  int counter = 0;
   while (1)
   {
 	//Sample
@@ -133,7 +181,7 @@ int main(void)
 	HAL_Delay(1000);
 	*/
 	//Ex1
-	///*
+	/*
 	if (status == 0) {
 		togglePin(1, 1);
 		togglePin(2, 0);
@@ -144,7 +192,9 @@ int main(void)
 		status = 0;
 	}
 	HAL_Delay(1000);
-	//*/
+	*/
+	//Ex2
+	traffic3_1(1, 2, 3, 5, 2, 3, status, counter);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
