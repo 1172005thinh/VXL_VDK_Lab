@@ -10,7 +10,8 @@
 ../Core/Src/main.c:353:6:seqClk	80	static
 ../Core/Src/main.c:376:6:clearAllClock	72	static
 ../Core/Src/main.c:385:6:setNumberOnClock	72	static
-../Core/Src/main.c:398:5:main	24	static
-../Core/Src/main.c:519:6:SystemClock_Config	72	static
-../Core/Src/main.c:556:13:MX_GPIO_Init	32	static
-../Core/Src/main.c:618:6:Error_Handler	4	static,ignoring_inline_asm
+../Core/Src/main.c:392:6:clearNumberOnClock	72	static
+../Core/Src/main.c:405:5:main	24	static
+../Core/Src/main.c:541:6:SystemClock_Config	72	static
+../Core/Src/main.c:578:13:MX_GPIO_Init	32	static
+../Core/Src/main.c:640:6:Error_Handler	4	static,ignoring_inline_asm
