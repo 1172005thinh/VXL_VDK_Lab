@@ -96,18 +96,18 @@ const PINMAP pinMap[] = {
     {_29_GPIO_Port, _29_Pin},  	// indexPin = 29
 };
 
-const bool segMapAnode[10][7] = {
-    //a, b, c, d, e, f, g
-    {0, 0, 0, 0, 0, 0, 1}, // 0
-    {1, 0, 0, 1, 1, 1, 1}, // 1
-    {0, 0, 1, 0, 0, 1, 0}, // 2
-    {0, 0, 0, 0, 1, 1, 0}, // 3
-    {1, 0, 0, 1, 1, 0, 0}, // 4
-    {0, 1, 0, 0, 1, 0, 0}, // 5
-    {0, 1, 0, 0, 0, 0, 0}, // 6
-    {0, 0, 0, 1, 1, 1, 1}, // 7
-    {0, 0, 0, 0, 0, 0, 0}, // 8
-    {0, 0, 0, 0, 1, 0, 0}  // 9
+const int segMapAnode[10] = {
+	//abcdefg
+	0b0000001, //0
+	0b1001111, //1
+	0b0010010, //2
+	0b0000110, //3
+	0b1001100, //4
+	0b0100100, //5
+	0b0100000, //6
+	0b0001111, //7
+	0b0000000, //8
+	0b0000100  //9
 };
 
 void togglePin(int indexPin, bool state) {
@@ -230,15 +230,15 @@ void traffic3_4(int indexPin_1, int indexPin_2, int indexPin_3, int indexPin_4, 
 }
 
 void seg7Anode_1(int indexPin_1, int indexPin_2, int indexPin_3, int indexPin_4, int indexPin_5, int indexPin_6, int indexPin_7, 
-				bool state[10][7], int num,
+				const int state[10], int num,
 				int time) {
-	togglePin(indexPin_1, state[num][0]);
-	togglePin(indexPin_2, state[num][1]);
-	togglePin(indexPin_3, state[num][2]);
-	togglePin(indexPin_4, state[num][3]);
-	togglePin(indexPin_5, state[num][4]);
-	togglePin(indexPin_6, state[num][5]);
-	togglePin(indexPin_7, state[num][6]);
+	togglePin(indexPin_1, state[num] & 0b1000000);
+	togglePin(indexPin_2, state[num] & 0b0100000);
+	togglePin(indexPin_3, state[num] & 0b0010000);
+	togglePin(indexPin_4, state[num] & 0b0001000);
+	togglePin(indexPin_5, state[num] & 0b0000100);
+	togglePin(indexPin_6, state[num] & 0b0000010);
+	togglePin(indexPin_7, state[num] & 0b0000001);
 	HAL_Delay(time*1000);
 }
 
