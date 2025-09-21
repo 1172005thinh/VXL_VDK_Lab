@@ -367,7 +367,18 @@ void seqClk() {
 			togglePin(pinMapClk[j], 0);
 		}
 		togglePin(pinMapClk[i], 1);
+		//Uncomment the line below to test clearAllClock() function
+		//if (i == 6 || i == 2 || i == 10) clearAllClock();
 		HAL_Delay(1000);
+	}
+}
+
+void clearAllClock() {
+	int pinMapClk[12] = {
+		12, 1, 2, 3, 4, 5, 6, 7, 8, 9 ,10, 11
+	};
+	for (int i = 0; i <= 11; i++) {
+		togglePin(pinMapClk[i], 0);
 	}
 }
 		
@@ -410,6 +421,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   int status = 0;
   int counter = 0;
+  bool led_sys = 0;
   while (1)
   {
 	//Sample
@@ -456,8 +468,20 @@ int main(void)
 	traffic3_7seg_4(1, 2 ,3 ,4 ,5, 6, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 5, 2, 3, status, counter);
 	*/
 	//Ex6
-	///*	
+	/*	
 	seqClk();
+	*/
+	//Ex7
+	///*
+	if (led_sys == 0) {
+		togglePin(13, 1);
+		led_sys = 1;
+	} else {
+		togglePin(13, 0);
+		led_sys = 0;
+	}
+	clearAllClock();
+	HAL_Delay(1000);
 	//*/
     /* USER CODE END WHILE */
 
