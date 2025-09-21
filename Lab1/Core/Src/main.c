@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include <stdbool.h>
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -60,22 +61,58 @@ typedef struct {
 } PINMAP;
 
 const PINMAP pinMap[] = {
-	{_1_GPIO_Port,  _1_Pin},   // indexPin = 1
-    {_2_GPIO_Port,  _2_Pin},   // indexPin = 2
-    {_3_GPIO_Port,  _3_Pin},   // indexPin = 3
-    {_4_GPIO_Port,  _4_Pin},   // indexPin = 4
-    {_5_GPIO_Port,  _5_Pin},   // indexPin = 5
-    {_6_GPIO_Port,  _6_Pin},   // indexPin = 6
-    {_7_GPIO_Port,  _7_Pin},   // indexPin = 7
-    {_8_GPIO_Port,  _8_Pin},   // indexPin = 8
-    {_9_GPIO_Port,  _9_Pin},   // indexPin = 9
-    {_10_GPIO_Port, _10_Pin},  // indexPin = 10
-    {_11_GPIO_Port, _11_Pin},  // indexPin = 11
-    {_12_GPIO_Port, _12_Pin},  // indexPin = 12
+	//PA1 to PA12
+	{_1_GPIO_Port, _1_Pin},   	// indexPin = 1
+    {_2_GPIO_Port, _2_Pin},  	// indexPin = 2
+    {_3_GPIO_Port, _3_Pin},  	// indexPin = 3
+    {_4_GPIO_Port, _4_Pin},   	// indexPin = 4
+    {_5_GPIO_Port, _5_Pin},   	// indexPin = 5
+    {_6_GPIO_Port, _6_Pin},   	// indexPin = 6
+    {_7_GPIO_Port, _7_Pin},   	// indexPin = 7
+    {_8_GPIO_Port, _8_Pin},   	// indexPin = 8
+    {_9_GPIO_Port, _9_Pin},   	// indexPin = 9
+    {_10_GPIO_Port, _10_Pin},  	// indexPin = 10
+    {_11_GPIO_Port, _11_Pin},  	// indexPin = 11
+    {_12_GPIO_Port, _12_Pin},  	// indexPin = 12
+	//PA13 to PA14 are reserved
+	//PA15
+	{_13_GPIO_Port, _13_Pin},  	// indexPin = 13
+	//PB0 to PB15
+    {_14_GPIO_Port, _14_Pin},  	// indexPin = 14
+    {_15_GPIO_Port, _15_Pin},  	// indexPin = 15
+    {_16_GPIO_Port, _16_Pin},  	// indexPin = 16
+    {_17_GPIO_Port, _17_Pin},  	// indexPin = 17
+    {_18_GPIO_Port, _18_Pin},  	// indexPin = 18
+    {_19_GPIO_Port, _19_Pin},  	// indexPin = 19
+    {_20_GPIO_Port, _20_Pin},  	// indexPin = 20
+    {_21_GPIO_Port, _21_Pin},  	// indexPin = 21
+    {_22_GPIO_Port, _22_Pin},  	// indexPin = 22
+    {_23_GPIO_Port, _23_Pin},  	// indexPin = 23
+    {_24_GPIO_Port, _24_Pin},  	// indexPin = 24
+	{_25_GPIO_Port, _25_Pin},  	// indexPin = 25
+    {_26_GPIO_Port, _26_Pin},  	// indexPin = 26
+    {_27_GPIO_Port, _27_Pin},  	// indexPin = 27
+	{_28_GPIO_Port, _27_Pin},  	// indexPin = 28
+    {_29_GPIO_Port, _29_Pin},  	// indexPin = 29
+};
+
+const bool segMapAnode[10][7] = {
+    //a, b, c, d, e, f, g
+    {0, 0, 0, 0, 0, 0, 1}, // 0
+    {1, 0, 0, 1, 1, 1, 1}, // 1
+    {0, 0, 1, 0, 0, 1, 0}, // 2
+    {0, 0, 0, 0, 1, 1, 0}, // 3
+    {1, 0, 0, 1, 1, 0, 0}, // 4
+    {0, 1, 0, 0, 1, 0, 0}, // 5
+    {0, 1, 0, 0, 0, 0, 0}, // 6
+    {0, 0, 0, 1, 1, 1, 1}, // 7
+    {0, 0, 0, 0, 0, 0, 0}, // 8
+    {0, 0, 0, 0, 1, 0, 0}  // 9
 };
 
 void togglePin(int indexPin, bool state) {
 	int idx = indexPin - 1;
+	//safety check -> time_1_4 == time_2_5 + time_3_6
 	if (idx < 0 || idx >= (sizeof(pinMap) / sizeof(pinMap[0]))) {
 		return;
 	}
@@ -142,6 +179,10 @@ void toggle6Pin(int indexPin_1, int indexPin_2, int indexPin_3, int indexPin_4, 
 void traffic3_4(int indexPin_1, int indexPin_2, int indexPin_3, int indexPin_4, int indexPin_5, int indexPin_6,
 				int time_1_4, int time_2_5, int time_3_6,
 				int state, int counter) {
+	//safety check -> time_1_4 == time_2_5 + time_3_6
+	if (time_1_4 != time_2_5 + time_3_6) {
+		return;
+	}
 	while (1)
 	{
 		switch (state)
@@ -186,7 +227,28 @@ void traffic3_4(int indexPin_1, int indexPin_2, int indexPin_3, int indexPin_4, 
 			counter = 0;
 		}
 	}
-}	
+}
+
+void seg7Anode_1(int indexPin_1, int indexPin_2, int indexPin_3, int indexPin_4, int indexPin_5, int indexPin_6, int indexPin_7, 
+				bool state[10][7], int num,
+				int time) {
+	togglePin(indexPin_1, state[num][0]);
+	togglePin(indexPin_2, state[num][1]);
+	togglePin(indexPin_3, state[num][2]);
+	togglePin(indexPin_4, state[num][3]);
+	togglePin(indexPin_5, state[num][4]);
+	togglePin(indexPin_6, state[num][5]);
+	togglePin(indexPin_7, state[num][6]);
+	HAL_Delay(time*1000);
+}
+
+void display7SEG(int num) {
+	//safety check -> 0 <= num <= 9
+	if (num < 0 || num > 9) {
+		return;
+	}
+	seg7Anode_1(14, 15, 16, 17, 18, 19, 20, segMapAnode, num, 1);
+}
 		
 /* USER CODE END 0 */
 
@@ -258,7 +320,16 @@ int main(void)
 	traffic3_1(1, 2, 3, 5, 2, 3, status, counter);
 	*/
 	//Ex3
+	/*
 	traffic3_4(1, 2, 3, 4, 5, 6, 5, 2, 3, status, counter);
+	*/
+	//Ex4
+	///*
+	if (counter >= 10) {
+		counter = 0;
+	}
+	display7SEG(counter++);
+	//*/
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -316,22 +387,45 @@ static void MX_GPIO_Init(void)
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, _1_Pin|_2_Pin|_3_Pin|_4_Pin
                           |_5_Pin|_6_Pin|_7_Pin|_8_Pin
-                          |_9_Pin|_10_Pin|_11_Pin|_12_Pin, GPIO_PIN_RESET);
+                          |_9_Pin|_10_Pin|_11_Pin|_12_Pin
+                          |_13_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, _14_Pin|_15_Pin|_16_Pin|_24_Pin
+                          |_25_Pin|_26_Pin|_27_Pin|_28_Pin
+                          |_29_Pin|_17_Pin|_18_Pin|_19_Pin
+                          |_20_Pin|_21_Pin|_22_Pin|_23_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : _1_Pin _2_Pin _3_Pin _4_Pin
                            _5_Pin _6_Pin _7_Pin _8_Pin
-                           _9_Pin _10_Pin _11_Pin _12_Pin */
+                           _9_Pin _10_Pin _11_Pin _12_Pin
+                           _13_Pin */
   GPIO_InitStruct.Pin = _1_Pin|_2_Pin|_3_Pin|_4_Pin
                           |_5_Pin|_6_Pin|_7_Pin|_8_Pin
-                          |_9_Pin|_10_Pin|_11_Pin|_12_Pin;
+                          |_9_Pin|_10_Pin|_11_Pin|_12_Pin
+                          |_13_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : _14_Pin _15_Pin _16_Pin _24_Pin
+                           _25_Pin _26_Pin _27_Pin _28_Pin
+                           _29_Pin _17_Pin _18_Pin _19_Pin
+                           _20_Pin _21_Pin _22_Pin _23_Pin */
+  GPIO_InitStruct.Pin = _14_Pin|_15_Pin|_16_Pin|_24_Pin
+                          |_25_Pin|_26_Pin|_27_Pin|_28_Pin
+                          |_29_Pin|_17_Pin|_18_Pin|_19_Pin
+                          |_20_Pin|_21_Pin|_22_Pin|_23_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
