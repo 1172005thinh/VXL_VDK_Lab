@@ -9,7 +9,8 @@
 ../Core/Src/main.c:280:6:traffic3_7seg_4	15
 ../Core/Src/main.c:353:6:seqClk	4
 ../Core/Src/main.c:376:6:clearAllClock	2
-../Core/Src/main.c:391:5:main	2
-../Core/Src/main.c:497:6:SystemClock_Config	3
-../Core/Src/main.c:534:13:MX_GPIO_Init	1
-../Core/Src/main.c:596:6:Error_Handler	1
+../Core/Src/main.c:385:6:setNumberOnClock	1
+../Core/Src/main.c:398:5:main	2
+../Core/Src/main.c:519:6:SystemClock_Config	3
+../Core/Src/main.c:556:13:MX_GPIO_Init	1
+../Core/Src/main.c:618:6:Error_Handler	1

@@ -381,6 +381,13 @@ void clearAllClock() {
 		togglePin(pinMapClk[i], 0);
 	}
 }
+
+void setNumberOnClock(int num) {
+	int pinMapClk[12] = {
+		12, 1, 2, 3, 4, 5, 6, 7, 8, 9 ,10, 11
+	};
+	togglePin(pinMapClk[num], 1);
+}
 		
 /* USER CODE END 0 */
 
@@ -472,7 +479,7 @@ int main(void)
 	seqClk();
 	*/
 	//Ex7
-	///*
+	/*
 	if (led_sys == 0) {
 		togglePin(13, 1);
 		led_sys = 1;
@@ -482,7 +489,21 @@ int main(void)
 	}
 	clearAllClock();
 	HAL_Delay(1000);
-	//*/
+	*/
+	//Ex8
+	///*
+	if (led_sys == 0) {
+		togglePin(13, 1);
+		led_sys = 1;
+	} else {
+		togglePin(13, 0);
+		led_sys = 0;
+	}
+	setNumberOnClock(0);
+	setNumberOnClock(2);
+	setNumberOnClock(5);
+	HAL_Delay(1000);
+	//*/	
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
