@@ -87,27 +87,27 @@ void traffic3_1(int indexPin_1, int indexPin_2, int indexPin_3, int time_1, int 
 	{
 		switch (state) {
 			case 0: // RED
-			togglePin(1, 1);
-			togglePin(2, 0);
-			togglePin(3, 0);
+			togglePin(indexPin_1, 1);
+			togglePin(indexPin_2, 0);
+			togglePin(indexPin_3, 0);
 			break;
 
 			case 1: // YELLOW
-			togglePin(1, 0);
-			togglePin(2, 1);
-			togglePin(3, 0);
+			togglePin(indexPin_1, 0);
+			togglePin(indexPin_2, 1);
+			togglePin(indexPin_3, 0);
 			break;
 
 			case 2: // GREEN
-			togglePin(1, 0);
-			togglePin(2, 0);
-			togglePin(3, 1);
+			togglePin(indexPin_1, 0);
+			togglePin(indexPin_2, 0);
+			togglePin(indexPin_3, 1);
 			break;
 
 			default: // safety fallback -> all OFF and reset
-			togglePin(1, 0);
-			togglePin(2, 0);
-			togglePin(3, 0);
+			togglePin(indexPin_1, 0);
+			togglePin(indexPin_2, 0);
+			togglePin(indexPin_3, 0);
 			state = 0;
 			counter = 0;
 			break;
@@ -116,18 +116,78 @@ void traffic3_1(int indexPin_1, int indexPin_2, int indexPin_3, int time_1, int 
 		HAL_Delay(1000);
 		counter++;
 
-		if (state == 0 && counter >= 5) {
+		if (state == 0 && counter >= time_1) {
 			state = 1;
 			counter = 0;
-		} else if (state == 1 && counter >= 2) {
+		} else if (state == 1 && counter >= time_2) {
 			state = 2;
 			counter = 0;
-		} else if (state == 2 && counter >= 3) {
+		} else if (state == 2 && counter >= time_3) {
 			state = 0;
 			counter = 0;
 		}
 	}
 }
+
+void toggle6Pin(int indexPin_1, int indexPin_2, int indexPin_3, int indexPin_4, int indexPin_5, int indexPin_6,
+				bool state_1, bool state_2, bool state_3, bool state_4, bool state_5, bool state_6) {
+	togglePin(indexPin_1, state_1);
+	togglePin(indexPin_2, state_2);
+	togglePin(indexPin_3, state_3);
+	togglePin(indexPin_4, state_4);
+	togglePin(indexPin_5, state_5);
+	togglePin(indexPin_6, state_6);
+}
+
+void traffic3_4(int indexPin_1, int indexPin_2, int indexPin_3, int indexPin_4, int indexPin_5, int indexPin_6,
+				int time_1_4, int time_2_5, int time_3_6,
+				int state, int counter) {
+	while (1)
+	{
+		switch (state)
+		{
+			case 0: // RED GREEN
+			toggle6Pin(indexPin_1, indexPin_2, indexPin_3, indexPin_4, indexPin_5, indexPin_6, 1, 0, 0, 0, 0, 1);
+			break;
+
+			case 1: // RED YELLOW
+			toggle6Pin(indexPin_1, indexPin_2, indexPin_3, indexPin_4, indexPin_5, indexPin_6, 1, 0, 0, 0, 1, 0);
+			break;
+
+			case 2: // GREEN RED
+			toggle6Pin(indexPin_1, indexPin_2, indexPin_3, indexPin_4, indexPin_5, indexPin_6, 0, 0, 1, 1, 0, 0);
+			break;
+			
+			case 3: // YELLOW RED
+			toggle6Pin(indexPin_1, indexPin_2, indexPin_3, indexPin_4, indexPin_5, indexPin_6, 0, 1, 0, 1, 0, 0);
+			break;
+
+			default: // safety fallback -> all OFF and reset
+			toggle6Pin(indexPin_1, indexPin_2, indexPin_3, indexPin_4, indexPin_5, indexPin_6, 0, 0, 0, 0, 0, 0);
+			state = 0;
+			counter = 0;
+			break;
+		}
+		
+		HAL_Delay(1000);
+		counter++;
+
+		if (state == 0 && counter >= time_3_6) {
+			state = 1;
+			counter = 0;
+		} else if (state == 1 && counter >= time_2_5) {
+			state = 2;
+			counter = 0;
+		} else if (state == 2 && counter >= time_1_4) {
+			state = 3;
+			counter = 0;
+		} else if (state == 3 && counter >= time_2_5) {
+			state = 0;
+			counter = 0;
+		}
+	}
+}	
+		
 /* USER CODE END 0 */
 
 /**
@@ -194,7 +254,11 @@ int main(void)
 	HAL_Delay(1000);
 	*/
 	//Ex2
+	/*
 	traffic3_1(1, 2, 3, 5, 2, 3, status, counter);
+	*/
+	//Ex3
+	traffic3_4(1, 2, 3, 4, 5, 6, 5, 2, 3, status, counter);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
