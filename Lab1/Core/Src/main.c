@@ -122,6 +122,7 @@ int main(void)
   while (1)
   {
 	//Sample
+	/*
 	if (status == 0) {
 		togglePin(1, 1);
 		status = 1;
@@ -130,6 +131,20 @@ int main(void)
 		status = 0;
 	}
 	HAL_Delay(1000);
+	*/
+	//Ex1
+	///*
+	if (status == 0) {
+		togglePin(1, 1);
+		togglePin(2, 0);
+		status = 1;
+	} else {
+		togglePin(1, 0);
+		togglePin(2, 1);
+		status = 0;
+	}
+	HAL_Delay(1000);
+	//*/
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
