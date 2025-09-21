@@ -292,7 +292,7 @@ void traffic3_7seg_4(int indexPin_1, int indexPin_2, int indexPin_3, int indexPi
 		if (led_sys == 0) {
 			togglePin(13, 1);
 			led_sys = 1;
-		} else if (led_sys == 1) {
+		} else {
 			togglePin(13, 0);
 			led_sys = 0;
 		}
@@ -300,32 +300,24 @@ void traffic3_7seg_4(int indexPin_1, int indexPin_2, int indexPin_3, int indexPi
 		{
 			case 0: // RED GREEN
 			toggle6Pin(indexPin_1, indexPin_2, indexPin_3, indexPin_4, indexPin_5, indexPin_6, 1, 0, 0, 0, 0, 1);
-			int timer_1 = time_1_4 - counter - 1;
-			int timer_2 = time_3_6 - counter - 1;
-			seg7Anode_1(indexPin_7, indexPin_8, indexPin_9, indexPin_10, indexPin_11, indexPin_12, indexPin_13, segMapAnode, timer_1, 1);
-			seg7Anode_2(indexPin_14, indexPin_15, indexPin_16, indexPin_17, indexPin_18, indexPin_19, indexPin_20, segMapAnode, timer_2 , 1);
+			seg7Anode_1(indexPin_7, indexPin_8, indexPin_9, indexPin_10, indexPin_11, indexPin_12, indexPin_13, segMapAnode, time_1_4 - counter - 1, 1);
+			seg7Anode_2(indexPin_14, indexPin_15, indexPin_16, indexPin_17, indexPin_18, indexPin_19, indexPin_20, segMapAnode, time_3_6 - counter - 1 , 1);
 			break;
 
 			case 1: // RED YELLOW
 			toggle6Pin(indexPin_1, indexPin_2, indexPin_3, indexPin_4, indexPin_5, indexPin_6, 1, 0, 0, 0, 1, 0);
-			timer_1 = time_2_5 - counter - 1;
-			timer_2 = time_2_5 - counter - 1;
 			seg7Anode_1(indexPin_7, indexPin_8, indexPin_9, indexPin_10, indexPin_11, indexPin_12, indexPin_13, segMapAnode, time_2_5 - counter - 1, 1);
 			seg7Anode_2(indexPin_14, indexPin_15, indexPin_16, indexPin_17, indexPin_18, indexPin_19, indexPin_20, segMapAnode, time_2_5 - counter - 1, 1);
 			break;
 
 			case 2: // GREEN RED
 			toggle6Pin(indexPin_1, indexPin_2, indexPin_3, indexPin_4, indexPin_5, indexPin_6, 0, 0, 1, 1, 0, 0);
-			timer_1 = time_3_6 - counter - 1;
-			timer_2 = time_1_4 - counter - 1;
 			seg7Anode_1(indexPin_7, indexPin_8, indexPin_9, indexPin_10, indexPin_11, indexPin_12, indexPin_13, segMapAnode, time_3_6 - counter - 1, 1);
 			seg7Anode_2(indexPin_14, indexPin_15, indexPin_16, indexPin_17, indexPin_18, indexPin_19, indexPin_20, segMapAnode, time_1_4 - counter - 1, 1);
 			break;
 			
 			case 3: // YELLOW RED
 			toggle6Pin(indexPin_1, indexPin_2, indexPin_3, indexPin_4, indexPin_5, indexPin_6, 0, 1, 0, 1, 0, 0);
-			timer_1 = time_2_5 - counter - 1;
-			timer_2 = time_2_5 - counter - 1;
 			seg7Anode_1(indexPin_7, indexPin_8, indexPin_9, indexPin_10, indexPin_11, indexPin_12, indexPin_13, segMapAnode, time_2_5 - counter - 1, 1);
 			seg7Anode_2(indexPin_14, indexPin_15, indexPin_16, indexPin_17, indexPin_18, indexPin_19, indexPin_20, segMapAnode, time_2_5 - counter - 1, 1);
 			break;
@@ -441,6 +433,10 @@ int main(void)
 	//Ex5
 	///*
 	traffic3_7seg_4(1, 2 ,3 ,4 ,5, 6, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 5, 2, 3, status, counter);
+	//*/
+	//Ex6
+	///*
+	
 	//*/
     /* USER CODE END WHILE */
 
