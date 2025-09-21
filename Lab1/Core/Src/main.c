@@ -349,6 +349,27 @@ void traffic3_7seg_4(int indexPin_1, int indexPin_2, int indexPin_3, int indexPi
 		}
 	}
 }
+
+void seqClk() {	
+	int pinMapClk[12] = {
+		12, 1, 2, 3, 4, 5, 6, 7, 8, 9 ,10, 11
+	};
+	bool led_sys = 0;	
+	for (int i = 0; i <= 11; i++) {
+		if (led_sys == 0) {
+			togglePin(13, 1);
+			led_sys = 1;
+		} else {
+			togglePin(13, 0);
+			led_sys = 0;
+		}
+		for (int j = 0; j <= 11; j++) {
+			togglePin(pinMapClk[j], 0);
+		}
+		togglePin(pinMapClk[i], 1);
+		HAL_Delay(1000);
+	}
+}
 		
 /* USER CODE END 0 */
 
@@ -431,12 +452,12 @@ int main(void)
 	display7SEG(counter++);
 	*/
 	//Ex5
-	///*
+	/*
 	traffic3_7seg_4(1, 2 ,3 ,4 ,5, 6, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 5, 2, 3, status, counter);
-	//*/
+	*/
 	//Ex6
-	///*
-	
+	///*	
+	seqClk();
 	//*/
     /* USER CODE END WHILE */
 

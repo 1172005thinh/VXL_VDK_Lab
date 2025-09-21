@@ -7,7 +7,8 @@
 ../Core/Src/main.c:257:6:seg7Anode_2	1
 ../Core/Src/main.c:271:6:display7SEG	3
 ../Core/Src/main.c:280:6:traffic3_7seg_4	15
-../Core/Src/main.c:359:5:main	1
-../Core/Src/main.c:452:6:SystemClock_Config	3
-../Core/Src/main.c:489:13:MX_GPIO_Init	1
-../Core/Src/main.c:551:6:Error_Handler	1
+../Core/Src/main.c:353:6:seqClk	4
+../Core/Src/main.c:380:5:main	1
+../Core/Src/main.c:473:6:SystemClock_Config	3
+../Core/Src/main.c:510:13:MX_GPIO_Init	1
+../Core/Src/main.c:572:6:Error_Handler	1
