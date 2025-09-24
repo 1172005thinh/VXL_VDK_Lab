@@ -21,48 +21,19 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "stm32f103c6.h"
+#include "soft_timer.h"
 #include <stdbool.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-typedef struct {
-  GPIO_TypeDef *port;
-	uint16_t pin;
-} PINMAP;
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define PA1   pinMap[0]
-#define PA2   pinMap[1]
-#define PA3   pinMap[2]
-#define PA4   pinMap[3]
-#define PA5   pinMap[4]
-#define PA6   pinMap[5]
-#define PA7   pinMap[6]
-#define PA8   pinMap[7]
-#define PA9   pinMap[8]
-#define PA10  pinMap[9]
-#define PA11  pinMap[10]
-#define PA12  pinMap[11]
-#define PA15  pinMap[12] //LED-SYS
-#define PB0   pinMap[13]
-#define PB1   pinMap[14]
-#define PB2   pinMap[15]
-#define PB3   pinMap[16]
-#define PB4   pinMap[17]
-#define PB5   pinMap[18]
-#define PB6   pinMap[19]
-#define PB7   pinMap[20]
-#define PB8   pinMap[21]
-#define PB9   pinMap[22]
-#define PB10  pinMap[23]
-#define PB11  pinMap[24]
-#define PB12  pinMap[25]
-#define PB13  pinMap[26]
-#define PB14  pinMap[27]
-#define PB15  pinMap[28]
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -74,88 +45,6 @@ typedef struct {
 TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN PV */
-//DEFINE PINMAP
-const PINMAP pinMap[] = {
-	//PA1 to PA12
-  {_1_GPIO_Port,  _1_Pin},   	// indexPin = 1
-  {_2_GPIO_Port,  _2_Pin},  	// indexPin = 2
-  {_3_GPIO_Port,  _3_Pin},  	// indexPin = 3
-  {_4_GPIO_Port,  _4_Pin},   	// indexPin = 4
-  {_5_GPIO_Port,  _5_Pin},   	// indexPin = 5
-  {_6_GPIO_Port,  _6_Pin},   	// indexPin = 6
-  {_7_GPIO_Port,  _7_Pin},   	// indexPin = 7
-  {_8_GPIO_Port,  _8_Pin},   	// indexPin = 8
-  {_9_GPIO_Port,  _9_Pin},   	// indexPin = 9
-  {_10_GPIO_Port, _10_Pin},  	// indexPin = 10
-  {_11_GPIO_Port, _11_Pin},  	// indexPin = 11
-  {_12_GPIO_Port, _12_Pin},  	// indexPin = 12
-  //PA13 to PA14 are reserved
-  //PA15 for LED-SYS
-  {_13_GPIO_Port, _13_Pin},  	// indexPin = 13
-	//PB0 to PB15
-  {_14_GPIO_Port, _14_Pin},  	// indexPin = 14
-  {_15_GPIO_Port, _15_Pin},  	// indexPin = 15
-  {_16_GPIO_Port, _16_Pin},  	// indexPin = 16
-  {_17_GPIO_Port, _17_Pin},  	// indexPin = 17
-  {_18_GPIO_Port, _18_Pin},  	// indexPin = 18
-  {_19_GPIO_Port, _19_Pin},  	// indexPin = 19
-  {_20_GPIO_Port, _20_Pin},  	// indexPin = 20
-  {_21_GPIO_Port, _21_Pin},  	// indexPin = 21
-  {_22_GPIO_Port, _22_Pin},  	// indexPin = 22
-  {_23_GPIO_Port, _23_Pin},  	// indexPin = 23
-  {_24_GPIO_Port, _24_Pin},  	// indexPin = 24
-  {_25_GPIO_Port, _25_Pin},  	// indexPin = 25
-  {_26_GPIO_Port, _26_Pin},  	// indexPin = 26
-  {_27_GPIO_Port, _27_Pin},  	// indexPin = 27
-  {_28_GPIO_Port, _28_Pin},  	// indexPin = 28
-  {_29_GPIO_Port, _29_Pin},  	// indexPin = 29
-};
-//END OF DEFINE PINMAP
-
-//SEGMENT MAP FOR COMMON ANODE 7-SEGMENT DISPLAY
-static const uint8_t segMapAnode[11] = {
-  //abcdefg
-  0b0000001, //0
-  0b1001111, //1
-  0b0010010, //2
-  0b0000110, //3
-  0b1001100, //4
-  0b0100100, //5
-  0b0100000, //6
-  0b0001111, //7
-  0b0000000, //8
-  0b0000100, //9
-  0b1001111  //E - ERROR
-};
-//END OF SEGMENT MAP
-
-//DEDICATED PINS
-static const PINMAP LED_SYS = PA15;
-
-static const PINMAP segMent_1[7] = {
-  PB0,
-  PB1,
-  PB2,
-  PB3,
-  PB4,
-  PB5,
-  PB6
-};
-
-static const PINMAP segMent_2[7] = {
-  PB7,
-  PB8,
-  PB9,
-  PB10,
-  PB11,
-  PB12,
-  PB13
-};
-//END OF DEDICATED PINS
-
-//VARIABLES
-
-//END OF VARIABLES
 
 /* USER CODE END PV */
 
@@ -164,43 +53,12 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
-void delay(double sec);
-void togglePin(PINMAP indexPin, bool state);
-void toggleSeg(PINMAP segment[7], uint8_t map[11], uint8_t number);
-void blinkLED_SYS();
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void delay(double sec) {
-  HAL_Delay(sec * 1000);
-}
 
-void togglePin(PINMAP pin, bool state) {
-  //safety check
-  if (pin.pin < 1 || pin.pin >= (sizeof(pinMap) / sizeof(pinMap[0]) + 1)) {
-    return;
-  }
-
-  HAL_GPIO_WritePin(pin.port, pin.pin, state ? GPIO_PIN_SET : GPIO_PIN_RESET);
-}
-
-void toggleSeg(PINMAP segment[7], uint8_t map[11], uint8_t number) {
-  //safety check
-  if (number < 0 || number > 10) {
-    number = 10; //E - ERROR
-  }
-
-  uint8_t state[7];
-  for (int i = 0; i < 7; i++) {
-    state[i] = (map[number] >> (6 - i)) & 0x01;
-    togglePin(segment[i], state[i]);
-  }
-}
-
-void blinkLED_SYS() {
-  HAL_GPIO_TogglePin(LED_SYS.port, LED_SYS.pin);
-}
 /* USER CODE END 0 */
 
 /**
@@ -239,8 +97,13 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  setTimer1(100); //1s
   while (1)
   {
+    if (timer1_flag == 1) {
+      setTimer1(100); //1s
+      blinkLED_SYS();
+    }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -389,13 +252,8 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-int counter = 100;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
-  counter--;
-  if (counter <= 0) {
-    counter = 100;
-    blinkLED_SYS();
-  }
+  timerRun();
 }
 /* USER CODE END 4 */
 
