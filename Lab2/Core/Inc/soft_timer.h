@@ -10,9 +10,11 @@
 
  #include <stdbool.h>
 
+ extern bool timerLED_SYS_flag;
  extern bool timer1_flag;
  extern bool timer2_flag;
  extern bool timer3_flag;
+ void setTimerLED_SYS(int duration);
  void setTimer1(int duration);
  void setTimer2(int duration);
  void setTimer3(int duration);
