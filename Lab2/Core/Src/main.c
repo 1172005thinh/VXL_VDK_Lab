@@ -101,29 +101,11 @@ int main(void)
   int durLED_SYS = 100;
   setTimerLED_SYS(durLED_SYS);
   //LED_SYS SETUP
-  int dur1 = 200; //README.txt
-  int dur2 = 10; //README.txt
-  int dur3 = 20; //README.txt  
-  setTimer1(dur1);
-  setTimer2(dur2);
-  setTimer3(dur3);
   while (1)
   {
     //LED_SYS
     blinkLED_SYS_TIM(durLED_SYS);
     //LED_SYS
-    if (timer1_flag == 1) {
-      setTimer1(dur1);
-      togglePin(PA6, 0); //ACTIVE LOW
-      togglePin(PA7, 1);
-      toggleSeg(segMent_1, segMapAnode, 1);
-    }
-    if (timer2_flag == 1) {
-      setTimer2(dur2);
-      togglePin(PA6, 1);
-      togglePin(PA7, 0);
-      toggleSeg(segMent_1, segMapAnode, 2);
-    }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
