@@ -8,6 +8,7 @@
  #include "main.h"
  #include "stm32f1xx_hal.h"
  #include "stm32f103c6.h"
+ #include "soft_timer.h"
 
  const PINMAP pinMap[] = {
 	 //PA1 to PA12
@@ -89,7 +90,7 @@
 
  void togglePin(PINMAP pin, bool state) {
    //safety check
-   if (pin.pin < 1 || pin.pin >= (sizeof(pinMap) / sizeof(pinMap[0]) + 1)) {
+   if (pin.port == NULL) {
      return;
    }
 
@@ -111,3 +112,16 @@
    HAL_GPIO_TogglePin(LED_SYS.port, LED_SYS.pin);
  }
 
+void blinkPin(PINMAP pin) {
+   if (pin.port == NULL) {
+     return;
+   }
+   HAL_GPIO_TogglePin(pin.port, pin.pin);
+ }
+
+ void blinkLED_SYS_TIM(int duration) {
+   if (timerLED_SYS_flag == 1) {
+     setTimerLED_SYS(duration);
+     blinkLED_SYS();
+   }
+ }

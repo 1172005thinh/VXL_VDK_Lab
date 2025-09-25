@@ -56,5 +56,7 @@
  void togglePin(PINMAP indexPin, bool state);
  void toggleSeg(PINMAP segment[7], uint8_t map[12], uint8_t number);
  void blinkLED_SYS();
+ void blinkPin(PINMAP pin);
+ void blinkLED_SYS_TIM(int duration);
 
  #endif /* INC_STM32F103C6_H_ */
