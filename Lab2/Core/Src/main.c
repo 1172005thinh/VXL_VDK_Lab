@@ -102,6 +102,10 @@ int main(void)
   setTimerLED_SYS(durLED_SYS);
   //LED_SYS SETUP
   //TIMER SETUP
+  int dur1 = 10;
+  int dur2 = 20;
+  setTimer1(dur1);
+  setTimer2(dur2);
   //TIMER SETUP
   while (1)
   {
@@ -109,7 +113,20 @@ int main(void)
     blinkLED_SYS_TIM(durLED_SYS);
     //LED_SYS OPERATION
     //TIMER OPERATION
-    //TODO
+    if (timer1_flag == 1)
+    {
+      setTimer1(dur1);
+      togglePin(PA6, 0);
+      togglePin(PA7, 1);
+      toggleSeg(segMent_1, segMapAnode, 1);
+    }
+    if (timer2_flag == 1)
+    {
+      setTimer2(dur2);
+      togglePin(PA6, 1);
+      togglePin(PA7, 0);
+      toggleSeg(segMent_1, segMapAnode, 2);
+    }
     //TIMER OPERATION
     /* USER CODE END WHILE */
 
