@@ -2,4 +2,4 @@
 ../Core/Src/soft_timer.c:27:7:setTimer1	16	static
 ../Core/Src/soft_timer.c:32:7:setTimer2	16	static
 ../Core/Src/soft_timer.c:37:7:setTimer3	16	static
-../Core/Src/soft_timer.c:42:7:timerRun	4	static
+../Core/Src/soft_timer.c:43:7:timerRun	4	static

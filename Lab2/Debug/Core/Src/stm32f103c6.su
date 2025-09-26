@@ -2,5 +2,4 @@
 ../Core/Src/stm32f103c6.c:91:7:togglePin	24	static
 ../Core/Src/stm32f103c6.c:100:7:toggleSeg	32	static
 ../Core/Src/stm32f103c6.c:111:7:blinkLED_SYS	8	static
-../Core/Src/stm32f103c6.c:115:6:blinkPin	16	static
-../Core/Src/stm32f103c6.c:122:7:blinkLED_SYS_TIM	16	static
+../Core/Src/stm32f103c6.c:115:7:blinkLED_SYS_TIM	16	static
