@@ -101,11 +101,16 @@ int main(void)
   int durLED_SYS = 100;
   setTimerLED_SYS(durLED_SYS);
   //LED_SYS SETUP
+  //TIMER SETUP
+  //TIMER SETUP
   while (1)
   {
-    //LED_SYS
+    //LED_SYS OPERATION
     blinkLED_SYS_TIM(durLED_SYS);
-    //LED_SYS
+    //LED_SYS OPERATION
+    //TIMER OPERATION
+    //TODO
+    //TIMER OPERATION
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
