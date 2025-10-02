@@ -163,7 +163,7 @@ int main(void)
   //LED_SYS SETUP
   
   //DIGITAL CLOCK SETUP
-  int multiplexTimer = 5;  // 250ms per display (25 * 10ms = 250ms)
+  int multiplexTimer = 25;  // 250ms per display (25 * 10ms = 250ms)
   int colonTimer = 100;     // 1 second for DOT blinking (100 * 10ms = 1000ms)
   int clockTimer = 10;     // 1 second for clock update (100 * 10ms = 1000ms) (speed up 10x for demo)
   int currentDisplay = 0;
