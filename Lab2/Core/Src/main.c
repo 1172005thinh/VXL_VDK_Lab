@@ -83,6 +83,7 @@ void updateClockBuffer();
 void updateLEDMatrix(int row);
 void setRowData(unsigned char row_data);
 void setColumnEnable(int column, int enable);
+void shiftMatrixBufferLeft();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -144,27 +145,27 @@ void updateClockBuffer() {
 // LED Matrix Functions
 void setRowData(unsigned char row_data) {
     // Set ROW0-ROW7 - LOW ACTIVE
-    togglePin(PB8, !((row_data >> 0) & 0x01));  // ROW0
-    togglePin(PB9, !((row_data >> 1) & 0x01));  // ROW1
-    togglePin(PB10, !((row_data >> 2) & 0x01)); // ROW2
-    togglePin(PB11, !((row_data >> 3) & 0x01)); // ROW3
-    togglePin(PB12, !((row_data >> 4) & 0x01)); // ROW4
-    togglePin(PB13, !((row_data >> 5) & 0x01)); // ROW5
-    togglePin(PB14, !((row_data >> 6) & 0x01)); // ROW6
-    togglePin(PB15, !((row_data >> 7) & 0x01)); // ROW7
+    togglePin(PB8, !((row_data >> 0) & 0x01));      // ROW0
+    togglePin(PB9, !((row_data >> 1) & 0x01));      // ROW1
+    togglePin(PB10, !((row_data >> 2) & 0x01));     // ROW2
+    togglePin(PB11, !((row_data >> 3) & 0x01));     // ROW3
+    togglePin(PB12, !((row_data >> 4) & 0x01));     // ROW4
+    togglePin(PB13, !((row_data >> 5) & 0x01));     // ROW5
+    togglePin(PB14, !((row_data >> 6) & 0x01));     // ROW6
+    togglePin(PB15, !((row_data >> 7) & 0x01));     // ROW7
 }
 
 void setColumnEnable(int column, int enable) {
     // Set ENM0-ENM7 - HIGH ACTIVE
     switch(column) {
-        case 0: togglePin(PA1, !enable); break;    // ENM0
-        case 1: togglePin(PA2, !enable); break;    // ENM1
-        case 2: togglePin(PA3, !enable); break;    // ENM2
-        case 3: togglePin(PA4, !enable); break;    // ENM3
-        case 4: togglePin(PA10, !enable); break;   // ENM4
-        case 5: togglePin(PA11, !enable); break;   // ENM5
-        case 6: togglePin(PA12, !enable); break;   // ENM6
-        case 7: togglePin(PB7, !enable); break;    // ENM7
+        case 0: togglePin(PA1, !enable); break;     // ENM0
+        case 1: togglePin(PA2, !enable); break;     // ENM1
+        case 2: togglePin(PA3, !enable); break;     // ENM2
+        case 3: togglePin(PA4, !enable); break;     // ENM3
+        case 4: togglePin(PA10, !enable); break;    // ENM4
+        case 5: togglePin(PA11, !enable); break;    // ENM5
+        case 6: togglePin(PA12, !enable); break;    // ENM6
+        case 7: togglePin(PB7, !enable); break;     // ENM7
     }
 }
 
@@ -179,6 +180,16 @@ void updateLEDMatrix(int index) {
         setRowData(matrix_buffer[index]);
         setColumnEnable(index, 1);
     }
+}
+
+void shiftMatrixBufferLeft() {
+    unsigned char temp = matrix_buffer[0];
+    
+    for (int i = 0; i <= MAX_LED_MATRIX - 2; i++) {
+        matrix_buffer[i] = matrix_buffer[i + 1];
+    }
+    
+    matrix_buffer[MAX_LED_MATRIX - 1] = temp;
 }
 /* USER CODE END 0 */
 
@@ -237,8 +248,10 @@ int main(void)
   //DIGITAL CLOCK SETUP
   
   //LED MATRIX SETUP
-  int matrixTimer = 1;  // 10ms for matrix display (1 * 10ms = 10ms)
+  int matrixTimer = 1;      // 10ms for matrix display (1 * 10ms = 10ms)
+  int animationTimer = 10; // 100ms for animation shift (10 * 10ms = 100ms)
   setTimer4(matrixTimer);
+  setTimer5(animationTimer);
   //LED MATRIX SETUP
   while (1)
   {
@@ -246,6 +259,7 @@ int main(void)
     blinkLED_SYS_TIM(durLED_SYS);
     //LED_SYS OPERATION
 
+    //DIGITAL CLOCK OPERATION
     if (timer1_flag == 1)
     {
       setTimer1(multiplexTimer);
@@ -275,7 +289,14 @@ int main(void)
       updateLEDMatrix(index_led_matrix);
       index_led_matrix = (index_led_matrix + 1) % MAX_LED_MATRIX;
     }
-    //LED MATRIX OPERATION
+    
+    //LED MATRIX ANIMATION
+    if (timer5_flag == 1)
+    {
+      setTimer5(animationTimer);
+      shiftMatrixBufferLeft();
+    }
+    //LED MATRIX ANIMATION
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

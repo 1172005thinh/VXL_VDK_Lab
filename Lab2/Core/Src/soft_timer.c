@@ -13,12 +13,14 @@
  bool timer2_flag = 0;
  bool timer3_flag = 0;
  bool timer4_flag = 0;
+ bool timer5_flag = 0;
 
  int timerLED_SYS_counter = 0;
  int timer1_counter = 0;
  int timer2_counter = 0;
  int timer3_counter = 0;
  int timer4_counter = 0;
+ int timer5_counter = 0;
 
  //duration in 10ms (1s ---> duration = 100)
  void setTimerLED_SYS(int duration) {
@@ -45,6 +47,11 @@
     timer4_counter = duration;
     timer4_flag = 0;
  }
+
+ void setTimer5(int duration) {
+    timer5_counter = duration;
+    timer5_flag = 0;
+ }
  
  //10ms
  void timerRun() {
@@ -67,5 +74,9 @@
     if (timer4_counter > 0) {
        timer4_counter--;
        if (timer4_counter == 0) timer4_flag = 1;
+    }
+    if (timer5_counter > 0) {
+       timer5_counter--;
+       if (timer5_counter == 0) timer5_flag = 1;
     }
  }
