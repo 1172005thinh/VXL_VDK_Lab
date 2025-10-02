@@ -48,6 +48,11 @@ TIM_HandleTypeDef htim2;
 const int MAX_LED = 4;
 int index_led = 0;
 int led_buffer[4] = {1, 2, 3, 4};
+
+// Clock variables
+int hour = 23;
+int minute = 58;
+int second = 58;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -56,6 +61,7 @@ static void MX_GPIO_Init(void);
 static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 void update7SEG(int index);
+void updateClockBuffer();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -89,6 +95,28 @@ void update7SEG(int index){
             togglePin(PA8, 1);
             togglePin(PA9, 1);
             break;
+    }
+}
+
+void updateClockBuffer() {
+    // Extract individual digits from hour and minute
+    led_buffer[0] = hour / 10;        // Hours tens digit
+    led_buffer[1] = hour % 10;        // Hours units digit  
+    led_buffer[2] = minute / 10;      // Minutes tens digit
+    led_buffer[3] = minute % 10;      // Minutes units digit
+    
+    // Handle time increment (increment every second)
+    second++;
+    if (second >= 60) {
+        second = 0;
+        minute++;
+        if (minute >= 60) {
+            minute = 0;
+            hour++;
+            if (hour >= 24) {
+                hour = 0;
+            }
+        }
     }
 }
 /* USER CODE END 0 */
@@ -135,11 +163,17 @@ int main(void)
   //LED_SYS SETUP
   
   //DIGITAL CLOCK SETUP
-  int multiplexTimer = 25;  // 250ms per display (25 * 10ms = 250ms)
+  int multiplexTimer = 5;  // 250ms per display (25 * 10ms = 250ms)
   int colonTimer = 100;     // 1 second for DOT blinking (100 * 10ms = 1000ms)
+  int clockTimer = 10;     // 1 second for clock update (100 * 10ms = 1000ms) (speed up 10x for demo)
   int currentDisplay = 0;
+  
+  // Initialize clock buffer with current time
+  updateClockBuffer();
+  
   setTimer1(multiplexTimer);
   setTimer2(colonTimer);
+  setTimer3(clockTimer);
   //DIGITAL CLOCK SETUP
   while (1)
   {
@@ -162,6 +196,12 @@ int main(void)
     {
       setTimer2(colonTimer);
       blinkPin(PA5);
+    }
+    
+    if (timer3_flag == 1)
+    {
+      setTimer3(clockTimer);
+      updateClockBuffer();  // Update clock every second
     }
     //DIGITAL CLOCK OPERATION
     /* USER CODE END WHILE */
