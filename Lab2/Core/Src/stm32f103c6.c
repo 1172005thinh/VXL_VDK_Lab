@@ -90,7 +90,7 @@
 
  void togglePin(PINMAP pin, bool state) {
    //safety check
-   if (pin.pin < 1 || pin.pin >= (sizeof(pinMap) / sizeof(pinMap[0]) + 1)) {
+   if (pin.port == NULL) {
      return;
    }
 
@@ -102,10 +102,15 @@
    if (number < 0 || number > 10) {
      number = 11; //E - ERROR
    }
+   
    for (int i = 0; i < 7; i++) {
      uint8_t state = (map[number] >> (6 - i)) & 0x01;
      togglePin(segment[i], state);
    }
+ }
+
+ void blinkPin(PINMAP pin) {
+   HAL_GPIO_TogglePin(pin.port, pin.pin);
  }
 
  void blinkLED_SYS() {

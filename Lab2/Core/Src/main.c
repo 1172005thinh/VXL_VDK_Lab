@@ -61,24 +61,33 @@ void update7SEG(int index);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 void update7SEG(int index){
-    switch (index){
+    togglePin(PA6, 1);
+    togglePin(PA7, 1);
+    togglePin(PA8, 1);
+    togglePin(PA9, 1);
+    
+    int digitToShow = led_buffer[index];
+    
+    toggleSeg(segMent_1, segMapAnode, digitToShow);
+    
+    switch(index) {
         case 0:
-            //Display the first 7SEG with led_buffer[0]
-            toggleSeg(segMent_1, segMapAnode, led_buffer[0]);
+            togglePin(PA6, 0);
             break;
         case 1:
-            //Display the second 7SEG with led_buffer[1]
-            toggleSeg(segMent_2, segMapAnode, led_buffer[1]);
+            togglePin(PA7, 0);
             break;
         case 2:
-            //Display the third 7SEG with led_buffer[2]
-            toggleSeg(segMent_1, segMapAnode, led_buffer[2]);
+            togglePin(PA8, 0);
             break;
         case 3:
-            //Display the forth 7SEG with led_buffer[3]
-            toggleSeg(segMent_2, segMapAnode, led_buffer[3]);
+            togglePin(PA9, 0);
             break;
         default:
+            togglePin(PA6, 1);
+            togglePin(PA7, 1);
+            togglePin(PA8, 1);
+            togglePin(PA9, 1);
             break;
     }
 }
@@ -124,24 +133,37 @@ int main(void)
   int durLED_SYS = 100;
   setTimerLED_SYS(durLED_SYS);
   //LED_SYS SETUP
-  //TIMER SETUP
-  int timer7SEG = 25; // 250ms refresh rate for 7SEG multiplexing
-  setTimer1(timer7SEG);
-  //TIMER SETUP
+  
+  //DIGITAL CLOCK SETUP
+  int multiplexTimer = 5;
+  int colonTimer = 100;
+  int currentDisplay = 0;
+  setTimer1(multiplexTimer);
+  setTimer2(colonTimer);
+  //DIGITAL CLOCK SETUP
   while (1)
   {
     //LED_SYS OPERATION
     blinkLED_SYS_TIM(durLED_SYS);
     //LED_SYS OPERATION
-    //TIMER OPERATION
-    if (timer1_flag == 1) {
-        setTimer1(timer7SEG);
-        update7SEG(index_led++);
-        if (index_led >= MAX_LED) {
-            index_led = 0;
-        }
+    //DIGITAL CLOCK OPERATION
+    if (timer1_flag == 1)
+    {
+      setTimer1(multiplexTimer);
+      
+      // Call update7SEG function with current display index
+      update7SEG(currentDisplay);
+      
+      // Move to next display
+      currentDisplay = (currentDisplay + 1) % 4;
     }
-    //TIMER OPERATION
+    
+    if (timer2_flag == 1)
+    {
+      setTimer2(colonTimer);
+      blinkPin(PA5);
+    }
+    //DIGITAL CLOCK OPERATION
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
