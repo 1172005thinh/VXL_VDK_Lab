@@ -53,6 +53,24 @@ int led_buffer[4] = {1, 2, 3, 4};
 int hour = 23;
 int minute = 58;
 int second = 58;
+
+// LED Matrix variables (LOW ACTIVE for ROWs)
+const int MAX_LED_MATRIX = 8;
+int index_led_matrix = 0;
+unsigned char matrix_buffer[8] = {
+  //ROWx
+  //x=
+  //76543210
+  //A
+  0b00000000, 
+  0b11111100, 
+  0b00010010, 
+  0b00010001, 
+  0b00010001, 
+  0b00010010, 
+  0b11111100, 
+  0b00000000
+};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -62,6 +80,9 @@ static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 void update7SEG(int index);
 void updateClockBuffer();
+void updateLEDMatrix(int row);
+void setRowData(unsigned char row_data);
+void setColumnEnable(int column, int enable);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -119,6 +140,46 @@ void updateClockBuffer() {
         }
     }
 }
+
+// LED Matrix Functions
+void setRowData(unsigned char row_data) {
+    // Set ROW0-ROW7 - LOW ACTIVE
+    togglePin(PB8, !((row_data >> 0) & 0x01));  // ROW0
+    togglePin(PB9, !((row_data >> 1) & 0x01));  // ROW1
+    togglePin(PB10, !((row_data >> 2) & 0x01)); // ROW2
+    togglePin(PB11, !((row_data >> 3) & 0x01)); // ROW3
+    togglePin(PB12, !((row_data >> 4) & 0x01)); // ROW4
+    togglePin(PB13, !((row_data >> 5) & 0x01)); // ROW5
+    togglePin(PB14, !((row_data >> 6) & 0x01)); // ROW6
+    togglePin(PB15, !((row_data >> 7) & 0x01)); // ROW7
+}
+
+void setColumnEnable(int column, int enable) {
+    // Set ENM0-ENM7 - HIGH ACTIVE
+    switch(column) {
+        case 0: togglePin(PA1, !enable); break;    // ENM0
+        case 1: togglePin(PA2, !enable); break;    // ENM1
+        case 2: togglePin(PA3, !enable); break;    // ENM2
+        case 3: togglePin(PA4, !enable); break;    // ENM3
+        case 4: togglePin(PA10, !enable); break;   // ENM4
+        case 5: togglePin(PA11, !enable); break;   // ENM5
+        case 6: togglePin(PA12, !enable); break;   // ENM6
+        case 7: togglePin(PB7, !enable); break;    // ENM7
+    }
+}
+
+void updateLEDMatrix(int index) {
+    // Turn off all columns first
+    for(int col = 0; col < 8; col++) {
+        setColumnEnable(col, 0);
+    }
+
+    // Set row data and enable the current column
+    if(index < MAX_LED_MATRIX) {
+        setRowData(matrix_buffer[index]);
+        setColumnEnable(index, 1);
+    }
+}
 /* USER CODE END 0 */
 
 /**
@@ -162,33 +223,35 @@ int main(void)
   setTimerLED_SYS(durLED_SYS);
   //LED_SYS SETUP
   
-  //DIGITAL CLOCK SETUP
-  int multiplexTimer = 25;  // 250ms per display (25 * 10ms = 250ms)
+  //DIGITAL CLOCK SETUP (Restore 7-segment functionality)
+  int multiplexTimer = 5;  // 250ms per display (25 * 10ms = 250ms) (speed up 5x for better visual)
   int colonTimer = 100;     // 1 second for DOT blinking (100 * 10ms = 1000ms)
   int clockTimer = 10;     // 1 second for clock update (100 * 10ms = 1000ms) (speed up 10x for demo)
   int currentDisplay = 0;
   
   // Initialize clock buffer with current time
-  updateClockBuffer();
-  
-  setTimer1(multiplexTimer);
+  updateClockBuffer();  
+  setTimer1(multiplexTimer);  // Restore 7-segment multiplexing
   setTimer2(colonTimer);
   setTimer3(clockTimer);
   //DIGITAL CLOCK SETUP
+  
+  //LED MATRIX SETUP
+  int matrixTimer = 1;  // 10ms for matrix display (1 * 10ms = 10ms)
+  setTimer4(matrixTimer);
+  //LED MATRIX SETUP
   while (1)
   {
     //LED_SYS OPERATION
     blinkLED_SYS_TIM(durLED_SYS);
     //LED_SYS OPERATION
-    //DIGITAL CLOCK OPERATION
+
     if (timer1_flag == 1)
     {
       setTimer1(multiplexTimer);
       
-      // Call update7SEG function with current display index
       update7SEG(currentDisplay);
       
-      // Move to next display
       currentDisplay = (currentDisplay + 1) % 4;
     }
     
@@ -201,9 +264,18 @@ int main(void)
     if (timer3_flag == 1)
     {
       setTimer3(clockTimer);
-      updateClockBuffer();  // Update clock every second
+      updateClockBuffer();
     }
     //DIGITAL CLOCK OPERATION
+    
+    //LED MATRIX OPERATION  
+    if (timer4_flag == 1)
+    {
+      setTimer4(matrixTimer);
+      updateLEDMatrix(index_led_matrix);
+      index_led_matrix = (index_led_matrix + 1) % MAX_LED_MATRIX;
+    }
+    //LED MATRIX OPERATION
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

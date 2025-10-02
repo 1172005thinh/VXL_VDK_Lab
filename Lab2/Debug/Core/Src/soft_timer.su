@@ -1,5 +1,6 @@
-../Core/Src/soft_timer.c:22:7:setTimerLED_SYS	16	static
-../Core/Src/soft_timer.c:27:7:setTimer1	16	static
-../Core/Src/soft_timer.c:32:7:setTimer2	16	static
-../Core/Src/soft_timer.c:37:7:setTimer3	16	static
-../Core/Src/soft_timer.c:43:7:timerRun	4	static
+../Core/Src/soft_timer.c:24:7:setTimerLED_SYS	16	static
+../Core/Src/soft_timer.c:29:7:setTimer1	16	static
+../Core/Src/soft_timer.c:34:7:setTimer2	16	static
+../Core/Src/soft_timer.c:39:7:setTimer3	16	static
+../Core/Src/soft_timer.c:44:7:setTimer4	16	static
+../Core/Src/soft_timer.c:50:7:timerRun	4	static
