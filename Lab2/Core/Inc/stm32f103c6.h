@@ -55,6 +55,7 @@
  void delay(double sec);
  void togglePin(PINMAP indexPin, bool state);
  void toggleSeg(PINMAP segment[7], uint8_t map[12], uint8_t number);
+ void blinkPin(PINMAP pin);
  void blinkLED_SYS();
  void blinkLED_SYS_TIM(int duration);
 
