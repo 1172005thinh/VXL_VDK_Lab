@@ -264,10 +264,10 @@ int main(void)
   //LED_SYS SETUP
   
   //DIGITAL CLOCK SETUP
-  int multiplexTimer = 5;
- 800027a:	2305      	movs	r3, #5
+  int multiplexTimer = 25;  // 250ms per display (25 * 10ms = 250ms)
+ 800027a:	2319      	movs	r3, #25
  800027c:	607b      	str	r3, [r7, #4]
-  int colonTimer = 100;
+  int colonTimer = 100;     // 1 second for DOT blinking (100 * 10ms = 1000ms)
  800027e:	2364      	movs	r3, #100	@ 0x64
  8000280:	603b      	str	r3, [r7, #0]
   int currentDisplay = 0;
