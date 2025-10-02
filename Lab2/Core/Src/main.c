@@ -45,7 +45,9 @@
 TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN PV */
-
+const int MAX_LED = 4;
+int index_led = 0;
+int led_buffer[4] = {1, 2, 3, 4};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -53,12 +55,33 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
-
+void update7SEG(int index);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+void update7SEG(int index){
+    switch (index){
+        case 0:
+            //Display the first 7SEG with led_buffer[0]
+            toggleSeg(segMent_1, segMapAnode, led_buffer[0]);
+            break;
+        case 1:
+            //Display the second 7SEG with led_buffer[1]
+            toggleSeg(segMent_2, segMapAnode, led_buffer[1]);
+            break;
+        case 2:
+            //Display the third 7SEG with led_buffer[2]
+            toggleSeg(segMent_1, segMapAnode, led_buffer[2]);
+            break;
+        case 3:
+            //Display the forth 7SEG with led_buffer[3]
+            toggleSeg(segMent_2, segMapAnode, led_buffer[3]);
+            break;
+        default:
+            break;
+    }
+}
 /* USER CODE END 0 */
 
 /**
@@ -102,6 +125,8 @@ int main(void)
   setTimerLED_SYS(durLED_SYS);
   //LED_SYS SETUP
   //TIMER SETUP
+  int timer7SEG = 25; // 250ms refresh rate for 7SEG multiplexing
+  setTimer1(timer7SEG);
   //TIMER SETUP
   while (1)
   {
@@ -109,7 +134,13 @@ int main(void)
     blinkLED_SYS_TIM(durLED_SYS);
     //LED_SYS OPERATION
     //TIMER OPERATION
-    //TODO
+    if (timer1_flag == 1) {
+        setTimer1(timer7SEG);
+        update7SEG(index_led++);
+        if (index_led >= MAX_LED) {
+            index_led = 0;
+        }
+    }
     //TIMER OPERATION
     /* USER CODE END WHILE */
 
