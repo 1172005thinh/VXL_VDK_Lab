@@ -18,7 +18,8 @@ int timer1_counter = 0;
 int timer2_counter = 0;
 int timer3_counter = 0;
 
-//duration in 10ms (1s ---> duration = 100)
+// Duration is in TIMER_CYCLE_MS units
+// Example: To set 1 second with TIMER_CYCLE_MS=10ms, pass duration=100
 void setTimerLED_SYS(int duration) {
    timerLED_SYS_counter = duration;
    timerLED_SYS_flag = 0;
@@ -39,7 +40,7 @@ void setTimer3(int duration) {
    timer3_flag = 0;
 }
 
-//10ms
+// Called every TIMER_CYCLE_MS milliseconds
 void timerRun() {
    if (timerLED_SYS_counter > 0) {
       timerLED_SYS_counter--;

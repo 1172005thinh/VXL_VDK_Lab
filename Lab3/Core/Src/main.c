@@ -102,9 +102,9 @@ int main(void)
   
   // Initialize FSM and timers
   fsm_traffic_init();
-  setTimerLED_SYS(50);  // LED_SYS blinks every 500ms
-  setTimer1(100);        // 1 second timer for traffic countdown
-  setTimer2(25);         // 250ms timer for 2Hz LED blinking
+  setTimerLED_SYS(500 / TIMER_CYCLE_MS);  // LED_SYS blinks every 500ms
+  setTimer1(1000 / TIMER_CYCLE_MS);       // 1 second timer for traffic countdown
+  setTimer2(250 / TIMER_CYCLE_MS);        // 250ms timer for 2Hz LED blinking
 
   /* USER CODE END 2 */
 
@@ -115,10 +115,8 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    // Note: display_scan() is now called in timer interrupt (every 10ms)
     
-    // Blink system LED (using soft timer)
-    blinkLED_SYS_TIM(50);
+    blinkLED_SYS_TIM(500);
     
     // Process button inputs
     fsm_for_input_processing();

@@ -131,7 +131,7 @@ PINMAP EN_SEG_2_ROAD2 = PB14;
 
  void blinkLED_SYS_TIM(int duration) {
    if (timerLED_SYS_flag == 1) {
-     setTimerLED_SYS(duration);
+     setTimerLED_SYS(duration / TIMER_CYCLE_MS);
      blinkLED_SYS();
    }
  }

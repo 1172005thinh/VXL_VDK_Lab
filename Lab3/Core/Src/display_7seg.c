@@ -7,14 +7,21 @@
 
 #include "display_7seg.h"
 #include "main.h"
+#include "soft_timer.h"
 
 // Display buffers
 uint8_t display_buffer_road1[2] = {0, 0};  // [tens, ones]
 uint8_t display_buffer_road2[2] = {0, 0};  // [tens, ones]
 
 // Multiplexing state
-static uint8_t current_digit = 0;  // 0 or 1 (which digit is being displayed)
-static uint8_t scan_counter = 0;   // Counter for scanning timing
+static uint8_t current_digit = 0;
+static uint8_t scan_counter = 0;
+
+// Scan period in milliseconds (each digit displayed for this duration)
+#define SCAN_PERIOD_MS 50
+
+// Calculate how many timer cycles needed for scan period
+#define SCAN_CYCLES (SCAN_PERIOD_MS / TIMER_CYCLE_MS)
 
 // Seven-segment encoding for COMMON ANODE (active high)
 // Segments: a b c d e f g (bit 6 to bit 0)
@@ -88,17 +95,14 @@ static void write_segment_road2(uint8_t pattern) {
 }
 
 void display_scan(void) {
-    // Scan every 25 x 10ms = 250ms per digit (4Hz per digit, 2Hz complete refresh)
     scan_counter++;
-    if (scan_counter >= 25) {
+    if (scan_counter >= SCAN_CYCLES) {
         scan_counter = 0;
         
-        // Turn off all enable pins first
-        // For COMMON ANODE with PNP: HIGH = OFF (PNP not conducting)
-        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, GPIO_PIN_SET);   // EN_SEG_1_ROAD1 OFF
-        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);   // EN_SEG_2_ROAD1 OFF
-        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_SET);  // EN_SEG_1_ROAD2 OFF
-        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);  // EN_SEG_2_ROAD2 OFF
+        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, GPIO_PIN_SET);
+        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
+        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_SET);
+        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
         
         // Update segments for Road 1
         uint8_t digit_road1 = display_buffer_road1[current_digit];

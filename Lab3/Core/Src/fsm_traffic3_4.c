@@ -56,7 +56,7 @@ void fsm_traffic_run(void) {
         case NORM:
             if (red_duration != (green_duration + amber_duration)) {
                 if (timer2_flag == 1) {
-                    setTimer2(25);
+                    setTimer2(250 / TIMER_CYCLE_MS);
                     blink_state = !blink_state;
                     blink_amber_leds(blink_state);
                 }
@@ -140,7 +140,7 @@ void fsm_traffic_run(void) {
 
 void run_normal_traffic(void) {
     if (timer1_flag == 1) {
-        setTimer1(100);
+        setTimer1(1000 / TIMER_CYCLE_MS);
         
         if (traffic_counter > 0) {
             traffic_counter--;
@@ -232,7 +232,7 @@ void display_duration(int value) {
 
 void blink_leds_by_mode(void) {
     if (timer2_flag == 1) {
-        setTimer2(25);
+        setTimer2(250 / TIMER_CYCLE_MS);
         blink_state = !blink_state;
         
         if (current_state == RED) {
