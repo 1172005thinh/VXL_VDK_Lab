@@ -21,6 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "input_processing.h"
 
 /* USER CODE END Includes */
 
@@ -98,7 +99,7 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
+	fsm_for_input_processing();
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
