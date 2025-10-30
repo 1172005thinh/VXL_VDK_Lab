@@ -22,6 +22,10 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "input_processing.h"
+#include "fsm_traffic3_4.h"
+#include "soft_timer.h"
+#include "stm32f103c6.h"
+#include "display_7seg.h"
 
 /* USER CODE END Includes */
 
@@ -91,6 +95,16 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
+  HAL_TIM_Base_Start_IT(&htim2);
+  
+  // Initialize display system
+  display_init();
+  
+  // Initialize FSM and timers
+  fsm_traffic_init();
+  setTimerLED_SYS(50);  // LED_SYS blinks every 500ms
+  setTimer1(100);        // 1 second timer for traffic countdown
+  setTimer2(25);         // 250ms timer for 2Hz LED blinking
 
   /* USER CODE END 2 */
 
@@ -101,6 +115,16 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    // Note: display_scan() is now called in timer interrupt (every 10ms)
+    
+    // Blink system LED (using soft timer)
+    blinkLED_SYS_TIM(50);
+    
+    // Process button inputs
+    fsm_for_input_processing();
+    
+    // Run traffic FSM
+    fsm_traffic_run();
   }
   /* USER CODE END 3 */
 }
@@ -204,22 +228,47 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, _1_Pin|_2_Pin|_3_Pin|_4_Pin
-                          |_5_Pin|_6_Pin|_7_Pin|_8_Pin, GPIO_PIN_RESET);
+                          |_5_Pin|_6_Pin|_7_Pin|_8_Pin
+                          |_9_Pin|_10_Pin|_11_Pin|_12_Pin
+                          |_13_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, _24_Pin|_25_Pin|_26_Pin|_27_Pin
+                          |_28_Pin|_29_Pin|_17_Pin|_18_Pin
+                          |_19_Pin|_20_Pin|_21_Pin|_22_Pin
+                          |_23_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : _1_Pin _2_Pin _3_Pin _4_Pin
-                           _5_Pin _6_Pin _7_Pin _8_Pin */
+                           _5_Pin _6_Pin _7_Pin _8_Pin
+                           _9_Pin _10_Pin _11_Pin _12_Pin
+                           _13_Pin */
   GPIO_InitStruct.Pin = _1_Pin|_2_Pin|_3_Pin|_4_Pin
-                          |_5_Pin|_6_Pin|_7_Pin|_8_Pin;
+                          |_5_Pin|_6_Pin|_7_Pin|_8_Pin
+                          |_9_Pin|_10_Pin|_11_Pin|_12_Pin
+                          |_13_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : BUTTON_1_Pin */
-  GPIO_InitStruct.Pin = BUTTON_1_Pin;
+  /*Configure GPIO pins : _14_Pin _15_Pin _16_Pin */
+  GPIO_InitStruct.Pin = _14_Pin|_15_Pin|_16_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : _24_Pin _25_Pin _26_Pin _27_Pin
+                           _28_Pin _29_Pin _17_Pin _18_Pin
+                           _19_Pin _20_Pin _21_Pin _22_Pin
+                           _23_Pin */
+  GPIO_InitStruct.Pin = _24_Pin|_25_Pin|_26_Pin|_27_Pin
+                          |_28_Pin|_29_Pin|_17_Pin|_18_Pin
+                          |_19_Pin|_20_Pin|_21_Pin|_22_Pin
+                          |_23_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(BUTTON_1_GPIO_Port, &GPIO_InitStruct);
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 

@@ -1,0 +1,6 @@
+../Core/Src/stm32f103c6.c:99:7:delay	16	static
+../Core/Src/stm32f103c6.c:103:7:togglePin	24	static
+../Core/Src/stm32f103c6.c:112:7:toggleSeg	32	static
+../Core/Src/stm32f103c6.c:124:7:blinkPin	16	static
+../Core/Src/stm32f103c6.c:128:7:blinkLED_SYS	8	static
+../Core/Src/stm32f103c6.c:132:7:blinkLED_SYS_TIM	16	static

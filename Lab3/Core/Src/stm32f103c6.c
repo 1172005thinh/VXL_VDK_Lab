@@ -48,25 +48,37 @@
 
  PINMAP LED_SYS = PA15;
 
- PINMAP segMent_1[7] = {
-   PB0,
-   PB1,
-   PB2,
-   PB3,
-   PB4,
-   PB5,
-   PB6
- };
+// Seven-segment display for ROAD 1 (multiplexed)
+// Segments a-g: PA7, PA8, PA9, PA10, PA11, PA12, PB3
+PINMAP segMent_ROAD1[7] = {
+   PA7,   // segment a
+   PA8,   // segment b
+   PA9,   // segment c
+   PA10,  // segment d
+   PA11,  // segment e
+   PA12,  // segment f
+   PB3    // segment g
+};
 
- PINMAP segMent_2[7] = {
-   PB7,
-   PB8,
-   PB9,
-   PB10,
-   PB11,
-   PB12,
-   PB13
- };
+// Enable pins for ROAD 1 seven-segments
+PINMAP EN_SEG_1_ROAD1 = PB4;
+PINMAP EN_SEG_2_ROAD1 = PB5;
+
+// Seven-segment display for ROAD 2 (multiplexed)
+// Segments a-g: PB6, PB7, PB8, PB9, PB10, PB11, PB12
+PINMAP segMent_ROAD2[7] = {
+   PB6,   // segment a
+   PB7,   // segment b
+   PB8,   // segment c
+   PB9,   // segment d
+   PB10,  // segment e
+   PB11,  // segment f
+   PB12   // segment g
+};
+
+// Enable pins for ROAD 2 seven-segments
+PINMAP EN_SEG_1_ROAD2 = PB13;
+PINMAP EN_SEG_2_ROAD2 = PB14;
 
  uint8_t segMapAnode[12] = {
    //abcdefg
@@ -114,7 +126,7 @@
  }
 
  void blinkLED_SYS() {
-   HAL_GPIO_TogglePin(LED_SYS.port, LED_SYS.pin);
+   HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_15);  // PA15 = LED_SYS
  }
 
  void blinkLED_SYS_TIM(int duration) {

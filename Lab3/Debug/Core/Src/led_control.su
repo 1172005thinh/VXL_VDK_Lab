@@ -1,0 +1,6 @@
+../Core/Src/led_control.c:11:6:set_road1_leds	24	static
+../Core/Src/led_control.c:18:6:set_road2_leds	24	static
+../Core/Src/led_control.c:25:6:clear_all_traffic_leds	8	static
+../Core/Src/led_control.c:34:6:blink_red_leds	16	static
+../Core/Src/led_control.c:40:6:blink_amber_leds	16	static
+../Core/Src/led_control.c:46:6:blink_green_leds	16	static

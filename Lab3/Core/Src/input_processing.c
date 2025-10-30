@@ -7,6 +7,7 @@
 
 #include "main.h"
 #include "input_reading.h"
+#include "fsm_traffic3_4.h"
 
 enum ButtonState {
     BUTTON_RELEASED,
@@ -14,34 +15,42 @@ enum ButtonState {
     BUTTON_PRESSED_MORE_THAN_1_SECOND
 };
 
-static enum ButtonState buttonState = BUTTON_RELEASED;
+static enum ButtonState buttonState[3] = {
+    BUTTON_RELEASED,
+    BUTTON_RELEASED,
+    BUTTON_RELEASED
+};
 
 void fsm_for_input_processing(void) {
-    switch (buttonState) {
-        case BUTTON_RELEASED:
-            if (is_button_pressed(0)) {
-                buttonState = BUTTON_PRESSED;
-                // TODO: Increase value of PORTA by one unit
-                // Example: HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_x);
-            }
-            break;
+    // Process each button independently
+    for (int i = 0; i < 3; i++) {
+        switch (buttonState[i]) {
+            case BUTTON_RELEASED:
+                if (is_button_pressed(i)) {
+                    buttonState[i] = BUTTON_PRESSED;
+                    // Button action will be handled in fsm_traffic_run()
+                }
+                break;
 
-        case BUTTON_PRESSED:
-            if (!is_button_pressed(0)) {
-                buttonState = BUTTON_RELEASED;
-            } else if (is_button_pressed_1s(0)) {
-                buttonState = BUTTON_PRESSED_MORE_THAN_1_SECOND;
-            }
-            break;
+            case BUTTON_PRESSED:
+                if (!is_button_pressed(i)) {
+                    buttonState[i] = BUTTON_RELEASED;
+                } else if (is_button_pressed_1s(i)) {
+                    buttonState[i] = BUTTON_PRESSED_MORE_THAN_1_SECOND;
+                }
+                break;
 
-        case BUTTON_PRESSED_MORE_THAN_1_SECOND:
-            if (!is_button_pressed(0)) {
-                buttonState = BUTTON_RELEASED;
-            } else {
-                // TODO: Implement behavior for long press
-                // Example: auto-increment a value or trigger a continuous action
-            }
-            break;
+            case BUTTON_PRESSED_MORE_THAN_1_SECOND:
+                if (!is_button_pressed(i)) {
+                    buttonState[i] = BUTTON_RELEASED;
+                } else {
+                    // Auto-increment for button 1 (B2_T) when held
+                    if (i == 1 && current_state != NORM) {
+                        // Auto-increment in modification modes
+                    }
+                }
+                break;
+        }
     }
 }
 

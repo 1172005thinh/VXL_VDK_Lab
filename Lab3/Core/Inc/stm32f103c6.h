@@ -48,8 +48,12 @@
 
  extern const PINMAP pinMap[];
  extern PINMAP LED_SYS;
- extern PINMAP segMent_1[7];
- extern PINMAP segMent_2[7];
+ extern PINMAP segMent_ROAD1[7];
+ extern PINMAP segMent_ROAD2[7];
+ extern PINMAP EN_SEG_1_ROAD1;
+ extern PINMAP EN_SEG_2_ROAD1;
+ extern PINMAP EN_SEG_1_ROAD2;
+ extern PINMAP EN_SEG_2_ROAD2;
  extern uint8_t segMapAnode[12];
 
  void delay(double sec);

@@ -1,0 +1,6 @@
+../Core/Src/fsm_traffic3_4.c:42:6:fsm_traffic_init	1
+../Core/Src/fsm_traffic3_4.c:50:6:fsm_traffic_run	27
+../Core/Src/fsm_traffic3_4.c:141:6:run_normal_traffic	16
+../Core/Src/fsm_traffic3_4.c:225:6:display_mode	1
+../Core/Src/fsm_traffic3_4.c:229:6:display_duration	1
+../Core/Src/fsm_traffic3_4.c:233:6:blink_leds_by_mode	5

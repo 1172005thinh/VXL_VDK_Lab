@@ -8,7 +8,10 @@
 #include "main.h"
 
 // We aim to work with more than one button
-#define NO_OF_BUTTONS 1
+#define NO_OF_BUTTONS 3
+// Button 0: Mode selection (B1_T)
+// Button 1: Increment value (B2_T)
+// Button 2: Set value (B3_T)
 
 // Timer interrupt duration is 10 ms, so to pass 1 second,
 // we need to jump to the interrupt service routine 100 times
@@ -31,13 +34,31 @@ static uint8_t flagForButtonPress1s[NO_OF_BUTTONS];
 // after the button is pressed more than 1 second
 static uint16_t counterForButtonPress1s[NO_OF_BUTTONS];
 
+// Flag for detecting single button press (edge-triggered, not level-triggered)
+static uint8_t flagForButtonPressShort[NO_OF_BUTTONS];
+
 void button_reading(void) {
     for (char i = 0; i < NO_OF_BUTTONS; i++) {
         debounceButtonBuffer2[i] = debounceButtonBuffer1[i];
-        debounceButtonBuffer1[i] = HAL_GPIO_ReadPin(BUTTON_1_GPIO_Port, BUTTON_1_Pin);
+        
+        // Read different button pins based on index
+        if (i == 0) {
+            debounceButtonBuffer1[i] = HAL_GPIO_ReadPin(_14_GPIO_Port, _14_Pin);
+        } else if (i == 1) {
+            debounceButtonBuffer1[i] = HAL_GPIO_ReadPin(_15_GPIO_Port, _15_Pin);
+        } else if (i == 2) {
+            debounceButtonBuffer1[i] = HAL_GPIO_ReadPin(_16_GPIO_Port, _16_Pin);
+        }
 
         if (debounceButtonBuffer1[i] == debounceButtonBuffer2[i]) {
+            // If both buffers match, update the main button buffer
+            GPIO_PinState previousState = buttonBuffer[i];
             buttonBuffer[i] = debounceButtonBuffer1[i];
+            
+            // Detect button press edge (transition from released to pressed)
+            if (previousState == BUTTON_IS_RELEASED && buttonBuffer[i] == BUTTON_IS_PRESSED) {
+                flagForButtonPressShort[i] = 1;
+            }
         }
 
         if (buttonBuffer[i] == BUTTON_IS_PRESSED) {
@@ -65,4 +86,13 @@ unsigned char is_button_pressed(uint8_t index) {
 unsigned char is_button_pressed_1s(uint8_t index) {
     if (index >= NO_OF_BUTTONS) return 0xFF;
     return (flagForButtonPress1s[index] == 1);
+}
+
+unsigned char is_button_pressed_short(uint8_t index) {
+    if (index >= NO_OF_BUTTONS) return 0;
+    if (flagForButtonPressShort[index] == 1) {
+        flagForButtonPressShort[index] = 0;  // Clear flag after reading (one-shot)
+        return 1;
+    }
+    return 0;
 }
