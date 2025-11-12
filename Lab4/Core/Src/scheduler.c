@@ -18,10 +18,6 @@ static uint32_t task_id_counter = 0;
 // System time counter (in ticks)
 static uint32_t system_time_ticks = 0;
 
-/**
- * @brief Initialize the scheduler
- * Sets up the task list as empty
- */
 void SCH_Init(void) {
     task_list_head = NULL;
     task_id_counter = 0;
@@ -29,11 +25,6 @@ void SCH_Init(void) {
     Error_code_G = ERROR_SCH_OK;
 }
 
-/**
- * @brief Update function called from timer interrupt (every 10ms)
- * This function updates the first task in the linked list in O(1) time
- * The linked list is ordered by delay, so only the first task needs checking
- */
 void SCH_Update(void) {
     // Increment system time
     system_time_ticks++;
@@ -56,10 +47,6 @@ void SCH_Update(void) {
     }
 }
 
-/**
- * @brief Dispatch tasks that are ready to run
- * Executes tasks with RunMe flag set and handles periodic tasks
- */
 void SCH_Dispatch_Tasks(void) {
     sTask *current_task = task_list_head;
     sTask *prev_task = NULL;
@@ -135,16 +122,6 @@ void SCH_Dispatch_Tasks(void) {
     }
 }
 
-/**
- * @brief Add a new task to the scheduler
- * @param pFunction Pointer to the function to be executed
- * @param DELAY Initial delay in ticks before first execution
- * @param PERIOD Period in ticks for periodic execution (0 for one-shot)
- * @return Task ID, or 0 if failed
- * 
- * Tasks are stored in a linked list sorted by delay (delta encoding)
- * This allows O(1) updates in SCH_Update()
- */
 uint32_t SCH_Add_Task(void (*pFunction)(), uint32_t DELAY, uint32_t PERIOD) {
     // Allocate memory for new task
     sTask *new_task = (sTask *)malloc(sizeof(sTask));
@@ -193,11 +170,6 @@ uint32_t SCH_Add_Task(void (*pFunction)(), uint32_t DELAY, uint32_t PERIOD) {
     return new_task->TaskID;
 }
 
-/**
- * @brief Delete a task from the scheduler
- * @param TASK_ID ID of the task to delete
- * @return 1 if successful, 0 if task not found
- */
 uint8_t SCH_Delete_Task(uint32_t TASK_ID) {
     sTask *current = task_list_head;
     sTask *prev = NULL;
@@ -235,10 +207,6 @@ uint8_t SCH_Delete_Task(uint32_t TASK_ID) {
     return 0;
 }
 
-/**
- * @brief Get current system time in ticks
- * @return Current system time (10ms ticks)
- */
 uint32_t SCH_Get_Time(void) {
     return system_time_ticks;
 }
