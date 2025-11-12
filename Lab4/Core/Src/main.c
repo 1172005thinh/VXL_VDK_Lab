@@ -45,7 +45,14 @@
 TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN PV */
-
+uint32_t task_id_1 = 0;   // Store task IDs for dynamic deletion
+uint32_t task_id_2 = 0;
+uint32_t task_id_3 = 0;
+uint32_t task_id_4 = 0;
+uint32_t task_id_5 = 0;
+uint32_t task_id_6 = 0;
+uint32_t task_id_7 = 0;
+uint8_t demo_phase = 0;    // Track which demo phase we're in
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -54,6 +61,10 @@ static void MX_GPIO_Init(void);
 static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 void display7SEG(unsigned char number);
+void oneshot_startup(void);
+void oneshot_delete_task1(void);
+void oneshot_delete_task7(void);
+void oneshot_final_cleanup(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -170,6 +181,62 @@ void display7SEG(unsigned char number) {
     // printf("display7SEG - Current Number: %d - Time: %lu ms\n", number, SCH_Get_Time() * 10);
 }
 
+// ============================================================================
+// ONE-SHOT TASKS - Execute once and automatically deleted
+// ============================================================================
+
+void oneshot_startup(void) {
+    // Startup
+    HAL_GPIO_WritePin(_13_GPIO_Port, _13_Pin, GPIO_PIN_SET);
+    HAL_Delay(750);
+    // printf("Startup complete - Time: %lu ms\n", SCH_Get_Time() * 10);
+}
+
+void oneshot_delete_task1(void) {
+    // Delete task 1 after 5 seconds
+    if (task_id_1 != 0) {
+        SCH_Delete_Task(task_id_1);
+        //HAL_GPIO_WritePin(_1_GPIO_Port, _1_Pin, GPIO_PIN_RESET); // Ensure LED is off
+        // task_id_1 = 0;
+        // printf("Task 1 deleted - Time: %lu ms\n", SCH_Get_Time() * 10);
+    }
+}
+
+void oneshot_delete_task7(void) {
+    // Delete task 7 after 10 seconds
+    if (task_id_7 != 0) {
+        SCH_Delete_Task(task_id_7);
+        //HAL_GPIO_WritePin(_7_GPIO_Port, _7_Pin, GPIO_PIN_RESET); // Ensure LED is off
+        //task_id_7 = 0;
+        // printf("Task 7 deleted - Time: %lu ms\n", SCH_Get_Time() * 10);
+    }
+}
+
+void oneshot_final_cleanup(void) {
+    // After 20 seconds, delete all remaining tasks one by one
+    // Check if task IDs are valid before deleting
+    if (task_id_1 != 0) SCH_Delete_Task(task_id_1);
+    if (task_id_2 != 0) SCH_Delete_Task(task_id_2);
+    if (task_id_3 != 0) SCH_Delete_Task(task_id_3);
+    if (task_id_4 != 0) SCH_Delete_Task(task_id_4);
+    if (task_id_5 != 0) SCH_Delete_Task(task_id_5);
+    if (task_id_6 != 0) SCH_Delete_Task(task_id_6);
+    if (task_id_7 != 0) SCH_Delete_Task(task_id_7);
+
+    // Turn off all LEDs
+    //HAL_GPIO_WritePin(_1_GPIO_Port, _1_Pin, GPIO_PIN_RESET);
+    //HAL_GPIO_WritePin(_2_GPIO_Port, _2_Pin, GPIO_PIN_RESET);
+    //HAL_GPIO_WritePin(_3_GPIO_Port, _3_Pin, GPIO_PIN_RESET);
+    //HAL_GPIO_WritePin(_4_GPIO_Port, _4_Pin, GPIO_PIN_RESET);
+    //HAL_GPIO_WritePin(_5_GPIO_Port, _5_Pin, GPIO_PIN_RESET);
+    //HAL_GPIO_WritePin(_6_GPIO_Port, _6_Pin, GPIO_PIN_RESET);
+    //HAL_GPIO_WritePin(_7_GPIO_Port, _7_Pin, GPIO_PIN_RESET);
+    
+    display7SEG(10);  // Turn off 7-seg
+    demo_phase = 1;  // Enter sleep mode
+    // printf("All tasks deleted, entering sleep mode - Time: %lu ms\n", SCH_Get_Time() * 10);
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -206,28 +273,21 @@ int main(void)
   
   /**
    * ============================================================================
-   * SCHEDULER INITIALIZATION
+   * SCHEDULER INITIALIZATION - ADVANCED DEMO
    * ============================================================================
-   * 1. Initialize the scheduler data structures
-   * 2. Start the 10ms timer interrupt (TIM2)
-   * 3. Add 7 periodic tasks (3 at 500ms for LED_SYS, 7-seg, and Task1)
+   * This demo showcases:
+   * 1. Periodic tasks running at different intervals
+   * 2. One-shot tasks that execute once and auto-delete
+   * 3. Dynamic task deletion using SCH_Delete_Task()
+   * 4. Dynamic task addition using SCH_Add_Task()
+   * 5. Sleep mode when no tasks are scheduled
    * 
-   * Timer Configuration:
-   * - Clock: 8 MHz (HSI)
-   * - Prescaler: 7999 (÷8000)
-   * - Period: 9 (counts 0-9)
-   * - Result: 8MHz / 8000 / 10 = 100 Hz (10ms tick)
-   * 
-   * Multiple tasks can share the same period - they execute sequentially
-   * 
-   * Task Schedule:
-   * - Every 500ms: LED_SYS blinks, 7-seg counts (1→5), Pin1 blinks
-   * - Every 1000ms: Pin2 blinks (also every 2nd 7-seg change)
-   * - Every 1500ms: Pin3 blinks (also every 3rd 7-seg change)
-   * - Every 2000ms: Pin4 blinks (also every 4th 7-seg change)
-   * - Every 2500ms: Pin5 blinks (also every 5th 7-seg change)
-   * - Every 3000ms: Pin6 blinks (also every 6th 7-seg change)
-   * - Every 3500ms: Pin7 blinks (also every 7th 7-seg change)
+   * Timeline:
+   * - 0s: All periodic tasks start + startup one-shot
+   * - 5s: Task 1 (500ms) is deleted dynamically
+   * - 10s: Task 7 (3500ms) is deleted dynamically
+   * - 15s: Task 1 is re-added but with 1000ms period
+   * - 20s: All tasks deleted, system enters sleep mode
    * ============================================================================
    */
   
@@ -237,19 +297,23 @@ int main(void)
   // Start the timer interrupt (10ms period)
   HAL_TIM_Base_Start_IT(&htim2);
   
-  // Add periodic tasks
-  // Task IDs are returned but can be stored if needed for deletion later
-  // Format: SCH_Add_Task(function, initial_delay, period)
-  // Note: All times are in ticks (1 tick = 10ms)
+  // ========== ONE-SHOT TASKS (Period = 0) ==========
+  // These execute once at specified delay and are automatically deleted
+  SCH_Add_Task(oneshot_startup, 10, 0);           // Startup animation at 100ms
+  SCH_Add_Task(oneshot_delete_task1, 500, 0);    // Delete task1 at 5s
+  SCH_Add_Task(oneshot_delete_task7, 1100, 0);   // Delete task7 at 11s
+  SCH_Add_Task(oneshot_final_cleanup, 2500, 0);  // Cleanup at 25s
   
-  SCH_Add_Task(blinkLED_SYS, 0, 50);  // 500ms = 50 ticks (50 * 10ms)
-  SCH_Add_Task(blinkPin_1, 0, 50);    // 500ms = 50 ticks
-  SCH_Add_Task(blinkPin_2, 0, 100);  // 1000ms = 100 ticks
-  SCH_Add_Task(blinkPin_3, 0, 150);  // 1500ms = 150 ticks
-  SCH_Add_Task(blinkPin_4, 0, 200);  // 2000ms = 200 ticks
-  SCH_Add_Task(blinkPin_5, 0, 250);  // 2500ms = 250 ticks
-  SCH_Add_Task(blinkPin_6, 0, 300);  // 3000ms = 300 ticks
-  SCH_Add_Task(blinkPin_7, 0, 350);  // 3500ms = 350 ticks
+  // ========== PERIODIC TASKS ==========
+  // These run continuously until explicitly deleted
+  SCH_Add_Task(blinkLED_SYS, 0, 50);             // System heartbeat
+  task_id_1 = SCH_Add_Task(blinkPin_1, 0, 50);   // Store ID for deletion
+  task_id_2 =SCH_Add_Task(blinkPin_2, 0, 100);
+  task_id_3 = SCH_Add_Task(blinkPin_3, 0, 150);
+  task_id_4 = SCH_Add_Task(blinkPin_4, 0, 200);
+  task_id_5 = SCH_Add_Task(blinkPin_5, 0, 250);
+  task_id_6 = SCH_Add_Task(blinkPin_6, 0, 300);
+  task_id_7 = SCH_Add_Task(blinkPin_7, 0, 350);  // Store ID for deletion
 
   /* USER CODE END 2 */
 
@@ -262,22 +326,31 @@ int main(void)
     /* USER CODE BEGIN 3 */
     /**
      * =========================================================================
-     * MAIN SCHEDULER LOOP
+     * MAIN SCHEDULER LOOP WITH SLEEP MODE
      * =========================================================================
      * The main loop continuously dispatches tasks that are ready to run.
      * 
-     * - SCH_Dispatch_Tasks() checks all tasks with RunMe flag set
-     * - Executes ready tasks
-     * - Re-schedules periodic tasks
-     * - Deletes one-shot tasks
+     * When demo_phase = 1 (all tasks deleted), the system enters sleep mode
+     * to save power. The CPU will wake up every 10ms on timer interrupt but
+     * will have no tasks to execute, demonstrating low-power operation.
      * 
-     * Optional: Add __WFI() to enter low power mode when no tasks are ready
+     * Sleep mode benefits:
+     * - Reduces power consumption when idle
+     * - CPU can still wake on interrupts (timer, GPIO, etc.)
+     * - Useful for battery-powered applications
      * =========================================================================
      */
+    
+    // Dispatch any ready tasks
     SCH_Dispatch_Tasks();
     
-    // Optional: Enter low power mode if no tasks are ready
-    // __WFI(); // Wait For Interrupt
+    // Enter sleep mode if all tasks are done (demo_phase = 1)
+    if (demo_phase == 1) {        
+        // Enter sleep mode (CPU halts until next interrupt)
+        // __WFI() = Wait For Interrupt
+        // CPU will wake every 10ms on timer interrupt, check for tasks, then sleep again
+        __WFI();
+    }
   }
   /* USER CODE END 3 */
 }
