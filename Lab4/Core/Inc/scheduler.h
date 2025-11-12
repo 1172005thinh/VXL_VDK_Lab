@@ -14,13 +14,14 @@
 // Maximum number of tasks in the scheduler
 #define SCH_MAX_TASKS 40
 
-// Task structure for the scheduler (array-based for Proteus compatibility)
-typedef struct {
+// Task structure for the scheduler
+typedef struct sTask {
     void (*pTask)(void);        // Function pointer to the task
     uint32_t Delay;             // Delay (ticks) until the task will run
     uint32_t Period;            // Period (ticks) for periodic tasks (0 = one-shot)
     uint8_t RunMe;              // Flag indicating task is ready to run
     uint32_t TaskID;            // Unique task identifier
+    struct sTask *next;         // Pointer to next task in linked list
 } sTask;
 
 // Function prototypes

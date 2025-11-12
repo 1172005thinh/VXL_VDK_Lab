@@ -53,7 +53,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
-
+void display7SEG(unsigned char number);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -68,43 +68,106 @@ static void MX_TIM2_Init(void);
  * feedback of the timing accuracy.
  * 
  * The tasks run at:
- * - 500ms (2 Hz) - PA1
- * - 1000ms (1 Hz) - PA2
- * - 1500ms (0.67 Hz) - PA3
- * - 2000ms (0.5 Hz) - PA4
- * - 2500ms (0.4 Hz) - PA5
+ * - 500ms (2 Hz) - PA15/Pin13 (blinkLED_SYS) - System status LED
+ * - 500ms (2 Hz) - PA1 (blinkPin_1) - Task 1 indicator
+ * - 1000ms (1 Hz) - PA2 (blinkPin_2) - Task 2 indicator
+ * - 1500ms (0.67 Hz) - PA3 (blinkPin_3) - Task 3 indicator
+ * - 2000ms (0.5 Hz) - PA4 (blinkPin_4) - Task 4 indicator
+ * - 2500ms (0.4 Hz) - PA5 (blinkPin_5) - Task 5 indicator
+ * - 3000ms (0.33 Hz) - PA6 (blinkPin_6) - Task 6 indicator
+ * - 3500ms (0.29 Hz) - PA7 (blinkPin_7) - Task 7 indicator
+ * 
+ * Note: Multiple tasks can have the same period. They execute sequentially
+ * in the same scheduler dispatch cycle.
+ * 
+ * 7-Segment Display Mapping (PB0-PB6):
+ * PB0 (_14) = segment a    PB3 (_17) = segment d    PB6 (_20) = segment g
+ * PB1 (_15) = segment b    PB4 (_18) = segment e
+ * PB2 (_16) = segment c    PB5 (_19) = segment f
  * ============================================================================
  */
 
-void task_500ms(void) {
+void blinkLED_SYS(void) {
+    // Toggle LED_SYS on pin PA15 (pin 13)
+    HAL_GPIO_TogglePin(_13_GPIO_Port, _13_Pin);
+    // This task runs concurrently with blinkPin_1 at the same 500ms interval
+    //printf("Task 500ms Pin13 - Time: %lu ms\n", SCH_Get_Time() * 10);
+}
+
+void blinkPin_1(void) {
     // Toggle LED on pin PA1 (example)
     HAL_GPIO_TogglePin(_1_GPIO_Port, _1_Pin);
+    display7SEG(1);
     // Print timestamp (if UART is configured)
-    // printf("Task 500ms - Time: %lu ms\n", SCH_Get_Time() * 10);
+    // printf("blinkPin_1 - Task 500ms - Time: %lu ms\n", SCH_Get_Time() * 10);
 }
 
-void task_1000ms(void) {
+void blinkPin_2(void) {
     // Toggle LED on pin PA2 (example)
     HAL_GPIO_TogglePin(_2_GPIO_Port, _2_Pin);
-    // printf("Task 1000ms - Time: %lu ms\n", SCH_Get_Time() * 10);
+    display7SEG(2);
+    // printf("blinkPin_2 - Task 1000ms - Time: %lu ms\n", SCH_Get_Time() * 10);
 }
 
-void task_1500ms(void) {
+void blinkPin_3(void) {
     // Toggle LED on pin PA3 (example)
     HAL_GPIO_TogglePin(_3_GPIO_Port, _3_Pin);
-    // printf("Task 1500ms - Time: %lu ms\n", SCH_Get_Time() * 10);
+    display7SEG(3);
+    // printf("blinkPin_3 - Task 1500ms - Time: %lu ms\n", SCH_Get_Time() * 10);
 }
 
-void task_2000ms(void) {
+void blinkPin_4(void) {
     // Toggle LED on pin PA4 (example)
     HAL_GPIO_TogglePin(_4_GPIO_Port, _4_Pin);
-    // printf("Task 2000ms - Time: %lu ms\n", SCH_Get_Time() * 10);
+    display7SEG(4);
+    // printf("blinkPin_4 - Task 2000ms - Time: %lu ms\n", SCH_Get_Time() * 10);
 }
 
-void task_2500ms(void) {
+void blinkPin_5(void) {
     // Toggle LED on pin PA5 (example)
     HAL_GPIO_TogglePin(_5_GPIO_Port, _5_Pin);
-    // printf("Task 2500ms - Time: %lu ms\n", SCH_Get_Time() * 10);
+    display7SEG(5);
+    // printf("blinkPin_5 - Task 2500ms - Time: %lu ms\n", SCH_Get_Time() * 10);
+}
+
+void blinkPin_6(void) {
+    // Toggle LED on pin PA6 (example)
+    HAL_GPIO_TogglePin(_6_GPIO_Port, _6_Pin);
+    display7SEG(6);
+    // printf("blinkPin_6 - Task 3000ms - Time: %lu ms\n", SCH_Get_Time() * 10);
+}
+
+void blinkPin_7(void) {
+    // Toggle LED on pin PA7 (example)
+    HAL_GPIO_TogglePin(_7_GPIO_Port, _7_Pin);
+    display7SEG(7);
+    // printf("blinkPin_7 - Task 3500ms - Time: %lu ms\n", SCH_Get_Time() * 10);
+}
+
+void display7SEG(unsigned char number) {
+    uint8_t anode7SEG_map[11] = {
+        0b0000001, //0
+        0b1001111, //1
+        0b0010010, //2
+        0b0000110, //3
+        0b1001100, //4
+        0b0100100, //5
+        0b0100000, //6
+        0b0001111, //7
+        0b0000000, //8
+        0b0000100, //9
+        0b1111111  //All segments off
+    };
+    
+    // Display the current number on 7-segment (PB0-PB6: segments a-g)
+    HAL_GPIO_WritePin(_14_GPIO_Port, _14_Pin, (anode7SEG_map[number] & 0x40) ? GPIO_PIN_SET : GPIO_PIN_RESET);  // a
+    HAL_GPIO_WritePin(_15_GPIO_Port, _15_Pin, (anode7SEG_map[number] & 0x20) ? GPIO_PIN_SET : GPIO_PIN_RESET);  // b
+    HAL_GPIO_WritePin(_16_GPIO_Port, _16_Pin, (anode7SEG_map[number] & 0x10) ? GPIO_PIN_SET : GPIO_PIN_RESET);  // c
+    HAL_GPIO_WritePin(_17_GPIO_Port, _17_Pin, (anode7SEG_map[number] & 0x08) ? GPIO_PIN_SET : GPIO_PIN_RESET);  // d
+    HAL_GPIO_WritePin(_18_GPIO_Port, _18_Pin, (anode7SEG_map[number] & 0x04) ? GPIO_PIN_SET : GPIO_PIN_RESET);  // e
+    HAL_GPIO_WritePin(_19_GPIO_Port, _19_Pin, (anode7SEG_map[number] & 0x02) ? GPIO_PIN_SET : GPIO_PIN_RESET);  // f
+    HAL_GPIO_WritePin(_20_GPIO_Port, _20_Pin, (anode7SEG_map[number] & 0x01) ? GPIO_PIN_SET : GPIO_PIN_RESET);  // g
+    // printf("display7SEG - Current Number: %d - Time: %lu ms\n", number, SCH_Get_Time() * 10);
 }
 
 /* USER CODE END 0 */
@@ -147,13 +210,24 @@ int main(void)
    * ============================================================================
    * 1. Initialize the scheduler data structures
    * 2. Start the 10ms timer interrupt (TIM2)
-   * 3. Add 5 periodic tasks with different intervals
+   * 3. Add 7 periodic tasks (3 at 500ms for LED_SYS, 7-seg, and Task1)
    * 
    * Timer Configuration:
    * - Clock: 8 MHz (HSI)
    * - Prescaler: 7999 (÷8000)
    * - Period: 9 (counts 0-9)
    * - Result: 8MHz / 8000 / 10 = 100 Hz (10ms tick)
+   * 
+   * Multiple tasks can share the same period - they execute sequentially
+   * 
+   * Task Schedule:
+   * - Every 500ms: LED_SYS blinks, 7-seg counts (1→5), Pin1 blinks
+   * - Every 1000ms: Pin2 blinks (also every 2nd 7-seg change)
+   * - Every 1500ms: Pin3 blinks (also every 3rd 7-seg change)
+   * - Every 2000ms: Pin4 blinks (also every 4th 7-seg change)
+   * - Every 2500ms: Pin5 blinks (also every 5th 7-seg change)
+   * - Every 3000ms: Pin6 blinks (also every 6th 7-seg change)
+   * - Every 3500ms: Pin7 blinks (also every 7th 7-seg change)
    * ============================================================================
    */
   
@@ -168,11 +242,14 @@ int main(void)
   // Format: SCH_Add_Task(function, initial_delay, period)
   // Note: All times are in ticks (1 tick = 10ms)
   
-  SCH_Add_Task(task_500ms, 0, 50);    // 500ms = 50 ticks (50 * 10ms)
-  SCH_Add_Task(task_1000ms, 0, 100);  // 1000ms = 100 ticks
-  SCH_Add_Task(task_1500ms, 0, 150);  // 1500ms = 150 ticks
-  SCH_Add_Task(task_2000ms, 0, 200);  // 2000ms = 200 ticks
-  SCH_Add_Task(task_2500ms, 0, 250);  // 2500ms = 250 ticks
+  SCH_Add_Task(blinkLED_SYS, 0, 50);  // 500ms = 50 ticks (50 * 10ms)
+  SCH_Add_Task(blinkPin_1, 0, 50);    // 500ms = 50 ticks
+  SCH_Add_Task(blinkPin_2, 0, 100);  // 1000ms = 100 ticks
+  SCH_Add_Task(blinkPin_3, 0, 150);  // 1500ms = 150 ticks
+  SCH_Add_Task(blinkPin_4, 0, 200);  // 2000ms = 200 ticks
+  SCH_Add_Task(blinkPin_5, 0, 250);  // 2500ms = 250 ticks
+  SCH_Add_Task(blinkPin_6, 0, 300);  // 3000ms = 300 ticks
+  SCH_Add_Task(blinkPin_7, 0, 350);  // 3500ms = 350 ticks
 
   /* USER CODE END 2 */
 
