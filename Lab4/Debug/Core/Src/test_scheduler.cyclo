@@ -1,0 +1,7 @@
+../Core/Src/test_scheduler.c:23:6:test_one_shot_task	1
+../Core/Src/test_scheduler.c:33:6:test_multiple_timeouts	1
+../Core/Src/test_scheduler.c:44:6:test_task_deletion	2
+../Core/Src/test_scheduler.c:55:6:print_timestamp	1
+../Core/Src/test_scheduler.c:67:6:test_task_10ms	1
+../Core/Src/test_scheduler.c:75:6:test_task_100ms	1
+../Core/Src/test_scheduler.c:83:6:test_task_1000ms	1
