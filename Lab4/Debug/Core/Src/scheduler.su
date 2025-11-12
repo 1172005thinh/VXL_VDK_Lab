@@ -1,6 +1,6 @@
-../Core/Src/scheduler.c:25:6:SCH_Init	4	static
-../Core/Src/scheduler.c:37:6:SCH_Update	4	static
-../Core/Src/scheduler.c:63:6:SCH_Dispatch_Tasks	40	static
-../Core/Src/scheduler.c:148:10:SCH_Add_Task	40	static
-../Core/Src/scheduler.c:201:9:SCH_Delete_Task	24	static
-../Core/Src/scheduler.c:242:10:SCH_Get_Time	4	static
+../Core/Src/scheduler.c:28:6:SCH_Init	16	static
+../Core/Src/scheduler.c:47:6:SCH_Update	16	static
+../Core/Src/scheduler.c:78:6:SCH_Dispatch_Tasks	16	static
+../Core/Src/scheduler.c:113:10:SCH_Add_Task	32	static
+../Core/Src/scheduler.c:140:9:SCH_Delete_Task	24	static
+../Core/Src/scheduler.c:166:10:SCH_Get_Time	4	static
