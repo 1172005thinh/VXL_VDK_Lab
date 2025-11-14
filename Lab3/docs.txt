@@ -1,0 +1,78 @@
+5.2 Exercise1: SketchanFSM
+ Your task in this exercise is to sketch an FSM that describes your idea of how to
+ solve the problem.
+ Please add your report here.
+5.3 Exercise2: Proteus Schematic
+ Your task in this exercise is to draw a Proteus schematic for the problem above.
+ Please add your report here.
+ 5.4 Exercise3: Create STM32 Project
+ Your task in this exercise is to create a project that has pin corresponding to the Proteus schematic that you draw in previous section. You need to set up your timer interrupt is about 10ms.
+ Please add your report here.
+5.5 Exercise4: Modify Timer Parameters
+ Your task in this exercise is to modify the timer settings so that when we want to change the time duration of the timer interrupt, we change it the least and it will not affect the overall system. For example, the current system we have implemented is that it can blink an LED in 2 Hz, with the timer interrupt duration is 10ms. However, when we want to change the timer interrupt duration to 1ms or 100ms, it will not affect the 2Hz blinking LED.
+ Please add your report here.
+5.6 Exercise5: Adding code for button debouncing
+ Following the example of button reading and debouncing in the previous section,
+ your tasks in this exercise are:
+ • To add new files for input reading and output display,
+ • To add code for button debouncing,
+ • To add code for increasing mode when the first button is pressed.
+ Please add your report here.
+5.7 Exercise6: Adding code for displaying modes
+ Your tasks in this exercise are:
+ • To add code for display mode on seven-segment LEDs, and
+ • To add code for blinking LEDs depending on the mode that is selected.
+ Please add your report here.
+5.8 Exercise7: Adding code for increasing time duration valuefor
+ the redLEDs
+ Your tasks in this exercise are:
+ • to use the second button to increase the time duration value of the red LEDs
+ • to use the third button to set the value for the red LEDs.
+ Please add your report here.
+5.9 Exercise8: Adding code for increasing time duration value for the amberLEDs
+ Your tasks in this exercise are:
+ • to use the second button to increase the time duration value of the amber
+ LEDs
+ • tousethethird button to set the value for the amber LEDs.
+ Please add your report here.
+5.10 Exercise 9: Adding code for increasing time duration value
+ for the greenLEDs
+ Your tasks in this exercise are:
+ • to use the second button to increase the time duration value of the green
+ LEDs
+ • tousethethird button to set the value for the green LEDs.
+ Please add your report here.
+5.11 Exercise10: Tofinishtheproject
+ Your tasks in this exercise are:
+ • To integrate all the previous tasks to one final project
+ • To create avideo to showall features in the specification
+ • To add a report to describe yoursolution for each exercise.
+ • To submit your report and code on the BKeL
+
+
+ My pin mapping:
+ 
+ PA1 - RED_LED_ROAD1 <--> Share with the opposite site
+ PA2 - AMBER_LED_ROAD1 <--> Share with the opposite site
+ PA3 - GREEN_LED_ROAD1 <--> Share with the opposite site
+ PA4 - RED_LED_ROAD2 <--> Share with the opposite site
+ PA5 - AMBER_LED_ROAD2 <--> Share with the opposite site
+ PA6 - GREEN_LED_ROAD2 <--> Share with the opposite site
+
+ PA15 - LED_SYS --> to blink 1Hz to tell the system is running
+
+ I have changed my Button names. And already build with no errors, so the names are fine, just focus on the logic mapping
+
+ PB0 - BUTTON_1 --> BUTTON_MODE
+ PB1 - BUTTON_2 --> BUTTON_INCREASE
+ PB2 - BUTTON_3 --> BUTTON_SET
+
+ PA7..PA12 + PB3 - 2 7-segment LEDs ROAD1 --> scanning every 250ms
+ These enable PINs should be ACTIVE_LOW
+ PB4 - EN_SEG_1 ROAD1
+ PB5 - EN_SEG_2 ROAD1
+
+ PB6..PB12 - 2 7-segment LEDs ROAD2 --> scanning every 250ms
+ These enable PINs should be ACTIVE_LOW
+ PB13 - EN_SEG_1 ROAD2
+ PB14 - EN_SEG_2 ROAD2

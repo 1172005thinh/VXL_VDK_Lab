@@ -1,0 +1,661 @@
+1 Introduction
+1.1 Super Loop Architecture
+1 }
+2 void main ( void ) {
+3 // Prepare f o r Task X
+4 X _ I n i t ( ) ;
+5 while ( 1 ) { // ’ f o r ever ’ ( Super Loop )
+6 X ( ) ; // Perform the t a s k
+7 }
+8 }
+Program 1.1: Super loop program
+The main advantages of the Super Loop architecture illustrated above are:
+• (1) that it is simple, and therefore easy to understand, and
+• (2) that it consumes virtually no system memory or CPU resources.
+However, we get ‘nothing for nothing’: Super Loops consume little memory or pro-
+cessor resources because they provide few facilities to the developer. A particular
+limitation with this architecture is that it is very difficult to execute Task X at pre-
+cise intervals of time: as we will see, this is a very significant drawback.
+For example, consider a collection of requirements assembled from a range of dif-
+ferent embedded projects (in no particular order):
+• The current speed of the vehicle must be measured at 0.5 second intervals.
+• The display must be refreshed 40 times every second.
+• The calculated new throttle setting must be applied every 0.5 seconds.
+• A time-frequency transform must be performed 20 times every second.
+• If the alarm sounds, it must be switched off (for legal reasons) after 20 min-
+utes.
+• If the front door is opened, the alarm must sound in 30 seconds if the correct
+password is not entered in this time.
+• The engine vibration data must be sampled 1,000 times per second.
+• The frequency-domain data must be classified 20 times every second.
+• The keypad must be scanned every 200 ms.
+• The master (control) node must communicate with all other nodes (sensor
+nodes and sounder nodes) once per second.
+• The new throttle setting must be calculated every 0.5 seconds.
+Page 6 HCMUT - Computer Engineering
+• The sensors must be sampled once per second.
+We can summarize this list by saying that many embedded systems must carry out
+tasks at particular instants of time. More specifically, we have two kinds of activity
+to perform:
+• Periodic tasks, to be performed (say) once every 100 ms
+• One-shot tasks, to be performed once after a delay of (say) 50 ms
+This is very difficult to achieve with the primitive architecture shown in Program
+above. Suppose, for example, that we need to start Task X every 200 ms, and that
+the task takes 10 ms to complete. Program below illustrates one way in which we
+might adapt the code in order to try to achieve this.
+1 }
+2 void main ( void ) {
+3 // Prepare f o r Task X
+4 X _ I n i t ( ) ;
+5 while ( 1 ) { // ’ f o r ever ’ ( Super Loop )
+6 X ( ) ; // Perform the t a s k (10 ms duration )
+7 Delay_190ms ( ) ; // Delay f o r 190 ms
+8 }
+9 }
+Program 1.2: Trying to use the Super Loop architecture to execute tasks at regular
+intervals
+The approach is not generally adequate, because it will only work if the following
+conditions are satisfied:
+• We know the precise duration of Task X
+• This duration never varies
+In practical applications, determining the precise task duration is rarely straight-
+forward. Suppose we have a very simple task that does not interact with the out-
+side world but, instead, performs some internal calculations. Even under these
+rather restricted circumstances, changes to compiler optimization settings – even
+changes to an apparently unrelated part of the program – can alter the speed at
+which the task executes. This can make fine-tuning the timing very tedious and
+error prone.
+The second condition is even more problematic. Often in an embedded system
+the task will be required to interact with the outside world in a complex way. In
+these circumstances the task duration will vary according to outside activities in a
+manner over which the programmer has very little control.
+1.2 Timer-based interrupts and interrupt service routines
+A better solution to the problems outlined is to use timer-based interrupts as a
+means of invoking functions at particular times.
+Microcontroller Page 7
+An interrupt is a hardware mechanism used to notify a processor that an ‘event’
+has taken place: such events may be internal events or external events.
+When an interrupt is generated, the processor ‘jumps’ to an address at the bottom
+of the CODE memory area. These locations must contain suitable code with which
+the microcontroller can respond to the interrupt or, more commonly, the locations
+will include another ‘jump’ instruction, giving the address of suitable ‘interrupt
+service routine’ located elsewhere in (CODE) memory.
+Please see lab 3 for the more information of this approach.
+2 What is a scheduler?
+There are two ways of viewing a scheduler:
+• At one level, a scheduler can be viewed as a simple operating system that
+allows tasks to be called periodically or (less commonly) on a one-shot basis.
+• At a lower level, a scheduler can be viewed as a single timer interrupt ser-
+vice routine that is shared between many different tasks. As a result, only
+one timer needs to be initialized, and any changes to the timing generally re-
+quires only one function to be altered. Furthermore, we can generally use the
+same scheduler whether we need to execute one, ten or 100 different tasks.
+1 void main ( void ) {
+2 // Set up the scheduler
+3 SCH_Init () ;
+4 // Add the tasks (1 ms tick interval )
+5 // Function_A will run every 2 ms
+6 SCH_Add_Task ( Function_A , 0 , 2) ;
+7 // Function_B will run every 10 ms
+8 SCH_Add_Task ( Function_B , 1 , 10) ;
+9 // Function_C will run every 15 ms
+10 SCH_Add_Task ( Function_C , 3 , 15) ;
+11 while (1) {
+12 SCH_Dispatch_Tasks () ;
+13 }
+14 }
+Program 1.3: Example of how a scheduler uses
+2.1 The co-operative scheduler
+A co-operative scheduler provides a single-tasking system architecture
+Operation:
+• Tasks are scheduled to run at specific times (either on a periodic or one-shot
+basis)
+Page 8 HCMUT - Computer Engineering
+• When a task is scheduled to run it is added to the waiting list
+• When the CPU is free, the next waiting task (if any) is executed
+• The task runs to completion, then returns control to the scheduler
+Implementation:
+• The scheduler is simple and can be implemented in a small amount of code
+• The scheduler must allocate memory for only a single task at a time
+• The scheduler will generally be written entirely in a high-level language (such
+as ‘C’)
+• The scheduler is not a separate application; it becomes part of the developer’s
+code
+Performance:
+• Obtaining rapid responses to external events requires care at the design stage
+Reliability and safety:
+Co-operate scheduling is simple, predictable, reliable and safe
+A co-operative scheduler provides a simple, highly predictable environment. The
+scheduler is written entirely in ‘C’ and becomes part of the application: this tends
+to make the operation of the whole system more transparent and eases develop-
+ment, maintenance and porting to different environments. Memory overheads are
+17 bytes per task and CPU requirements (which vary with tick interval) are low.
+2.2 Function pointers
+One area of the language with which many ‘C’ programmers are unfamiliar is the
+function pointer. While comparatively rarely used in desktop programs, this lan-
+guage feature is crucial in the creation of schedulers: we therefore provide a brief
+introductory example here.
+The key point to note is that – just as we can, for example, determine the starting
+address of an array of data in memory – we can also find the address in memory
+at which the executable code for a particular function begins. This address can be
+used as a ‘pointer’ to the function; most importantly, it can be used to call the func-
+tion. Used with care, function pointers can make it easier to design and implement
+complex programs. For example, suppose we are developing a large, safety-critical,
+application, controlling an industrial plant. If we detect a critical situation, we may
+wish to shut down the system as rapidly as possible. However, the appropriate way
+to shut down the system will vary, depending on the system state. What we can
+do is create a number of different recovery functions and a function pointer. Every
+time the system state changes, we can alter the function pointer so that it is always
+pointing to the most appropriate recovery function. In this way, we know that –
+if there is ever an emergency situation – we can rapidly call the most appropriate
+function, by means of the function pointer.
+Microcontroller Page 9
+1 // −−−−−− P r i v a t e f u n c t i o n prototypes −−−−−−−−−−−−−−−−−−−−−−−−−−−−−
+2 void Square_Number ( i n t , i n t * ) ;
+3
+4 i n t main ( void )
+5 {
+6 i n t a = 2 , b = 3 ;
+7 / * Declares pFn to be a p o i n t e r to fn with
+8 i n t and i n t p o i n t e r parameters ( r e t u r n i n g void ) * /
+9 void ( * pFn ) ( i n t , i n t * ) ;
+10
+11 i n t Result_a , Result_b ;
+12 pFn = Square_Number ; // pFn holds address of Square_Number
+13 p r i n t f ( " Function code s t a r t s a t address : %u\n" , ( tWord ) pFn ) ;
+14 p r i n t f ( " Data item a s t a r t s a t address : %u\n\n" , ( tWord ) &a ) ;
+15 // C a l l ‘ Square_Number ’ in the conventional way
+16 Square_Number ( a , &R e s u l t _ a ) ;
+17 // C a l l ‘ Square_Number ’ using f u n c t i o n p o i n t e r
+18 ( * pFn ) ( b,& Result_b ) ;
+19 p r i n t f ( "%d squared i s %d ( using normal fn c a l l ) \n" , a , R e s u l t _ a
+) ;
+20 p r i n t f ( "%d squared i s %d ( using fn p o i n t e r ) \n" , b , Result_b ) ;
+21 while ( 1 ) ;
+22 r e t u r n 0 ;
+23 }
+24
+25 void Square_Number ( i n t a , i n t * b )
+26 { // Demo − c a l c u l a t e square of a
+27 * b = a * a ;
+28 }
+Program 1.4: Example of how to use function pointers
+2.3 Solution
+A scheduler has the following key components:
+• The scheduler data structure.
+• An initialization function.
+• A single interrupt service routine (ISR), used to update the scheduler at reg-
+ular time intervals.
+• A function for adding tasks to the scheduler.
+• A dispatcher function that causes tasks to be executed when they are due to
+run.
+• A function for removing tasks from the scheduler (not required in all appli-
+cations).
+We consider each of the required components in this section
+Page 10 HCMUT - Computer Engineering
+2.3.1 Overview
+Before discussing the scheduler components, we consider how the scheduler will
+typically appear to the user. To do this we will use a simple example: a scheduler
+used to flash a single LED on and off repeatedly: on for one second off for one
+second etc.
+1 i n t main ( void ) {
+2 // I n i t a l l the requirments f o r the system to run
+3 S y s t e m _ I n i t i a l i z a t i o n ( ) ;
+4 // I n i t a schedule
+5 SCH_Init ( ) ;
+6 //Add a t a s k to r e p e a t l y c a l l in every 1 second .
+7 SCH_Add_Task ( Led_Display , 0 , 1000) ;
+8 while ( 1 ) {
+9 SCH_Dispatch_Tasks ( ) ;
+10 }
+11 r e t u r n 0 ;
+12 }
+Program 1.5: Example of how to use a scheduler
+• We assume that the LED will be switched on and off by means of a ‘task’
+Led_Display(). Thus, if the LED is initially off and we call Led_Display() twice,
+we assume that the LED will be switched on and then switched off again.
+To obtain the required flash rate, we therefore require that the scheduler calls
+Led_Display() every second ad infinitum.
+• We prepare the scheduler using the function SCH_Init().
+• After preparing the scheduler, we add the function Led_Display() to the sched-
+uler task list using the SCH_Add_Task() function. At the same time we specify
+that the LED will be turned on and off at the required rate as follows:
+SCH_Add_Task(Led_Display, 0, 1000);
+We will shortly consider all the parameters of SCH_Add_Task(), and examine
+its internal structure.
+• The timing of the Led_Display() function will be controlled by the function
+SCH_Update(), an interrupt service routine triggered by the overflow of Timer
+2:
+1 void HAL_TIM_PeriodElapsedCallback ( TIM_HandleTypeDef * htim ) {
+2 SCH\ _Update ( ) ;
+3 }
+Program 1.6: Example of how to call SCH_Update function
+• The ‘Update’ function does not execute the task: it calculates when a task is
+due to run and sets a flag. The job of executing LED_Display() falls to the dis-
+patcher function (SCH_Dispatch_Tasks()), which runs in the main (‘super’)
+loop:
+Microcontroller Page 11
+1 while (1) {
+2 SCH_Dispatch_Tasks () ;
+3 }
+Before considering these components in detail, we should acknowledge that this
+is, undoubtedly, a complicated way of flashing an LED: if our intention were to
+develop an LED flasher application that requires minimal memory and minimal
+code size, this would not be a good solution. However, the key point is that we will
+be able to use the same scheduler architecture in all our subsequent examples, in-
+cluding a number of substantial and complex applications and the effort required
+to understand the operation of this environment will be rapidly repaid.
+It should also be emphasized that the scheduler is a ‘low-cost’ option: it consumes
+a small percentage of the CPU resources (we will consider precise percentages
+shortly). In addition, the scheduler itself requires no more than 17 bytes of mem-
+ory for each task. Since a typical application will require no more than four to six
+tasks, the task – memory budget (around 60 bytes) is not excessive, even on an
+8-bit microcontroller.
+2.3.2 The scheduler data structure and task array
+At the heart of the scheduler is the scheduler data structure: this is a user-defined
+data type which collects together the information required about each task.
+1
+2 typedef s t r u c t {
+3 // P o i n t e r to the t a s k ( must be a ’ void ( void ) ’ f u n c t i o n )
+4 void ( * pTask ) ( void ) ;
+5 // Delay ( t i c k s ) u n t i l the f u n c t i o n w i l l ( next ) be run
+6 u i n t 3 2 _ t Delay ;
+7 // I n t e r v a l ( t i c k s ) between subsequent runs .
+8 u i n t 3 2 _ t Period ;
+9 // Incremented ( by scheduler ) when t a s k i s due to execute
+10 u i n t 8 _ t RunMe ;
+11 // This i s a h i n t to s o l v e the question below .
+12 u i n t 3 2 _ t TaskID ;
+13 } sTask ;
+14
+15 // MUST BE ADJUSTED FOR EACH NEW PROJECT
+16 # d e f i n e SCH_MAX_TASKS 40
+17 # d e f i n e NO_TASK_ID 0
+18 sTask SCH_tasks_G [ SCH_MAX_TASKS ] ;
+Program 1.7: A struct of a task
+The size of the task array
+You must ensure that the task array is sufficiently large to store the tasks required
+in your application, by adjusting the value of SCH_MAX_TASKS. For example, if
+you schedule three tasks as follows:
+• SCH_Add_Task(Function_A, 0, 2);
+Page 12 HCMUT - Computer Engineering
+• SCH_Add_Task(Function_B, 1, 10);
+• SCH_Add_Task(Function_C, 3, 15);
+then SCH_MAX_TASKS must have a value of three (or more) for correct operation
+of the scheduler.
+Note also that, if this condition is not satisfied, the scheduler should generate an
+error code.
+2.3.3 The initialization function
+Like most of the tasks we wish to schedule, the scheduler itself requires an ini-
+tialization function. While this performs various important operations – such as
+preparing the scheduler array (discussed earlier) and the error code variable (dis-
+cussed later) – the main purpose of this function is to set up a timer that will be
+used to generate the regular ‘ticks’ that will drive the scheduler.
+1 void SCH_Init ( void ) {
+2 unsigned char i ;
+3 f o r ( i = 0 ; i < SCH_MAX_TASKS ; i ++) {
+4 SCH_Delete_Task ( i ) ;
+5 }
+6 // Reset the g l o b a l e r r o r v a r i a b l e
+7 // − SCH_Delete_Task ( ) w i l l generate an e r r o r code ,
+8 // ( because the t a s k a r r a y i s empty )
+9 Error_code_G = 0 ;
+10 T i m e r _ i n i t ( ) ;
+11 Watchdog_init ( ) ;
+12 }
+Program 1.8: Example of how
+2.3.4 The ‘Update’ function
+The ‘Update’ function is involved in the ISR. It is invoked when the timer is over-
+flow.
+When it determines that a task is due to run, the update function increments the
+RunMe field for this task: the task will then be executed by the dispatcher, as we
+discuss later.
+1 void SCH_Update ( void ) {
+2 unsigned char Index ;
+3 // NOTE: c a l c u l a t i o n s are in * TICKS * ( not m i l l i s e c o n d s )
+4 f o r ( Index = 0 ; Index < SCH_MAX_TASKS ; Index ++) {
+5 // Check i f t h e r e i s a t a s k a t t h i s l o c a t i o n
+6 i f ( SCH_tasks_G [ Index ] . pTask ) {
+7 i f ( SCH_tasks_G [ Index ] . Delay == 0 ) {
+8 // The t a s k i s due to run
+9 // Inc . the ’RunMe ’ f l a g
+10 SCH_tasks_G [ Index ] . RunMe += 1 ;
+Microcontroller Page 13
+11 i f ( SCH_tasks_G [ Index ] . Period ) {
+12 // Schedule p e r i o d i c t a s k s to run again
+13 SCH_tasks_G [ Index ] . Delay = SCH_tasks_G [ Index ] .
+Period ;
+14 }
+15 } e l s e {
+16 // Not y e t ready to run : j u s t decrement the delay
+17 SCH_tasks_G [ Index ] . Delay −= 1 ;
+18 }
+19 }
+20 }
+21 }
+22
+23 void HAL_TIM_PeriodElapsedCallback ( TIM_HandleTypeDef * htim ) {
+24 SCH_Update ( ) ;
+25 }
+Program 1.9: Example of how to write an SCH_Update function
+2.3.5 The ‘Add Task’ function
+As the name suggests, the ‘Add Task’ function is used to add tasks to the task array,
+to ensure that they are called at the required time(s). Here is the example of add
+task function: unsigned char SCH_Add_Task ( Task_Name , Initial_Delay, Period
+)
+The parameters for the ‘Add Task’ function are described as follows:
+• Task_Name: the name of the function (task) that you wish to schedule
+• Initial_Delay: the delay (in ticks) before task is first executed. If set to 0, the
+task is executed immediately.
+• Period: the interval (in ticks) between repeated executions of the task. If set
+to 0, the task is executed only once
+Here are some examples.
+This set of parameters causes the function Do_X() to be executed once after 1,000
+scheduler ticks:
+SCH_Add_Task(Do_X,1000,0);
+This does the same, but saves the task ID (the position in the task array) so that the
+task may be subsequently deleted, if necessary (see SCH_Delete_Task() for further
+information about the removal of tasks from the task array):
+Task_ID = SCH_Add_Task(Do_X,1000,0);
+This causes the function Do_X() to be executed regularly every 1,000 scheduler
+ticks; the task will first be executed as soon as the scheduling is started:
+SCH_Add_Task(Do_X,0,1000);
+This causes the function Do_X() to be executed regularly every 1,000 scheduler
+ticks; task will be first executed at T = 300 ticks, then 1,300, 2,300 etc:
+Page 14 HCMUT - Computer Engineering
+SCH_Add_Task(Do_X,300,1000);
+1 / *
+−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−*−
+2 SCH_Add_Task ( ) Causes a t a s k ( f u n c t i o n ) to be executed a t r e g u l a r
+i n t e r v a l s
+3 or a f t e r a user − defined delay
+4 −*−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−
+* /
+5 unsigned char SCH_Add_Task ( void ( * pFunction ) ( ) , unsigned i n t DELAY
+, unsigned i n t PERIOD )
+6 {
+7 unsigned char Index = 0 ;
+8 // F i r s t f i n d a gap in the a r r a y ( i f t h e r e i s one )
+9 while ( ( SCH_tasks_G [ Index ] . pTask ! = 0 ) && ( Index <
+SCH_MAX_TASKS) )
+10 {
+11 Index ++;
+12 }
+13 // Have we reached the end of the l i s t ?
+14 i f ( Index == SCH_MAX_TASKS)
+15 {
+16 // Task l i s t i s f u l l
+17 // Set the g l o b a l e r r o r v a r i a b l e
+18 Error_code_G = ERROR_SCH_TOO_MANY_TASKS ;
+19 // Also r e t u r n an e r r o r code
+20 r e t u r n SCH_MAX_TASKS ;
+21 }
+22 // I f we ’ re here , t h e r e i s a space in the t a s k a r r a y
+23 SCH_tasks_G [ Index ] . pTask = pFunction ;
+24 SCH_tasks_G [ Index ] . Delay = DELAY ;
+25 SCH_tasks_G [ Index ] . Period = PERIOD ;
+26 SCH_tasks_G [ Index ] . RunMe = 0 ;
+27 // r e t u r n p o s i t i o n of t a s k ( to allow l a t e r d e l e t i o n )
+28 r e t u r n Index ;
+29 }
+Program 1.10: An implementation of the scheduler ‘add task’ function
+2.3.6 The ‘Dispatcher’
+As we have seen, the ‘Update’ function does not execute any tasks: the tasks that
+are due to run are invoked through the ‘Dispatcher’ function.
+1 void SCH_Dispatch_Tasks ( void )
+2 {
+3 unsigned char Index ;
+4 // Dispatches ( runs ) the next t a s k ( i f one i s ready )
+5 f o r ( Index = 0 ; Index < SCH_MAX_TASKS ; Index ++) {
+6 i f ( SCH_tasks_G [ Index ] . RunMe > 0 ) {
+7 ( * SCH_tasks_G [ Index ] . pTask ) ( ) ; // Run the t a s k
+Microcontroller Page 15
+8 SCH_tasks_G [ Index ] . RunMe −= 1 ; // Reset / reduce RunMe
+f l a g
+9 // P e r i o d i c t a s k s w i l l a u t o m a t i c a l l y run again
+10 // − i f t h i s i s a ’ one shot ’ task , remove i t from the
+a r r a y
+11 i f ( SCH_tasks_G [ Index ] . Period == 0 )
+12 {
+13 SCH_Delete_Task ( Index ) ;
+14 }
+15 }
+16 }
+17 // Report system s t a t u s
+18 SCH_Report_Status ( ) ;
+19 // The scheduler e n t e r s i d l e mode a t t h i s point
+20 SCH_Go_To_Sleep ( ) ;
+21 }
+Program 1.11: An implementation of the scheduler ‘dispatch task’ function
+The dispatcher is the only component in the Super Loop:
+1 void main ( void )
+2 {
+3 . . .
+4 while ( 1 )
+5 {
+6 SCH_Dispatch_Tasks ( ) ;
+7 }
+Program 1.12: The dispatcher in the super loop
+Do we need a Dispatch function?
+At first inspection, the use of both the ‘Update’ and ‘Dispatch’ functions may seem
+a rather complicated way of running the tasks. Specifically, it may appear that the
+Dispatch function in unnecessary and that the Update function could invoke the
+tasks directly. However, the split between the Update and Dispatch operations is
+necessary, to maximize the reliability of the scheduler in the presence of long tasks.
+Suppose we have a scheduler with a tick interval of 1 ms and, for whatever reason,
+a scheduled task sometimes has a duration of 3 ms.
+If the Update function runs the functions directly then – all the time the long task is
+being executed – the tick interrupts are effectively disabled. Specifically, two ‘ticks’
+will be missed. This will mean that all system timing is seriously affected and may
+mean that two (or more) tasks are not scheduled to execute at all.
+If the Update and Dispatch function are separated, system ticks can still be pro-
+cessed while the long task is executing. This means that we will suffer task ‘jitter’
+(the ‘missing’ tasks will not be run at the correct time), but these tasks will, even-
+tually, run.
+Page 16 HCMUT - Computer Engineering
+2.3.7 The ‘Delete Task’ function
+When tasks are added to the task array, SCH_Add_Task() returns the position in the
+task array at which the task has been added: Task_ID = SCH_Add_Task(Do_X,1000,0);
+Sometimes it can be necessary to delete tasks from the array. To do so, SCH_Delete_Task()
+can be used as follows: SCH_Delete_Task(Task_ID)
+1 / *
+−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−
+* /
+2 unsigned char SCH_Delete_Task ( const t B y t e TASK_INDEX ) {
+3 unsigned char Return_code ;
+4 i f ( SCH_tasks_G [ TASK_INDEX ] . pTask == 0 ) {
+5 // No t a s k a t t h i s l o c a t i o n . . .
+6 //
+7 // Set the g l o b a l e r r o r v a r i a b l e
+8 Error_code_G = ERROR_SCH_CANNOT_DELETE_TASK
+9
+10 // . . . a l s o r e t u r n an e r r o r code
+11 Return_code = RETURN_ERROR ;
+12 } e l s e {
+13 Return_code = RETURN_NORMAL;
+14 }
+15 SCH_tasks_G [ TASK_INDEX ] . pTask = 0x0000 ;
+16 SCH_tasks_G [ TASK_INDEX ] . Delay = 0 ;
+17 SCH_tasks_G [ TASK_INDEX ] . Period = 0 ;
+18 SCH_tasks_G [ TASK_INDEX ] . RunMe = 0 ;
+19 r e t u r n Return_code ; // r e t u r n s t a t u s
+20 }
+Program 1.13: An implementation of the scheduler ‘delete task’ function
+2.3.8 Reducing power consumption
+An important feature of scheduled applications is that they can lend themselves to
+low-power operation. This is possible because all modern MCU provide an ‘idle’
+mode, where the CPU activity is halted, but the state of the processor is main-
+tained. In this mode, the power required to run the processor is typically reduced
+by around 50
+This idle mode is particularly effective in scheduled applications because it may
+be entered under software control, and the MCU returns to the normal operat-
+ing mode when any interrupt is received. Because the scheduler generates regular
+timer interrupts as a matter of course, we can put the system ‘ to sleep’ at the end
+of every dispatcher call: it will then wake up when the next timer tick occurs.
+This is an optional feature. Students can do by yourself by looking at the reference
+manual of the MCU that is used.
+1 void SCH_Go_To_Sleep ( ) {
+2 // todo : Optional
+Microcontroller Page 17
+3 }
+Program 1.14: An implementation of the scheduler ‘go to sleep’ function
+2.3.9 Reporting errors
+Hardware fails; software is never perfect; errors are a fact of life. To report errors
+at any part of the scheduled application, we can use an (8-bit) error code variable
+Error_code_G
+unsigned char Error_code_G = 0;
+To record an error we include lines such as:
+• Error_code_G = ERROR_SCH_TOO_MANY_TASKS;
+• Error_code_G = ERROR_SCH_WAITING_FOR_SLAVE_TO_ACK;
+• Error_code_G = ERROR_SCH_WAITING_FOR_START_COMMAND_FROM_MASTER;
+• Error_code_G = ERROR_SCH_ONE_OR_MORE_SLAVES_DID_NOT_START;
+• Error_code_G = ERROR_SCH_LOST_SLAVE;
+• Error_code_G = ERROR_SCH_CAN_BUS_ERROR;
+• Error_code_G = ERROR_I2C_WRITE_BYTE_AT24C64;
+To report these error codes, the scheduler has a function SCH_Report_Status(),
+which is called from the Update function.
+1 void SCH_Report_Status ( void ) {
+2 # i f d e f SCH_REPORT_ERRORS
+3 // ONLY APPLIES IF WE ARE REPORTING ERRORS
+4 // Check f o r a new e r r o r code
+5 i f ( Error_code_G ! = Last_error_code_G ) {
+6 // Negative l o g i c on LEDs assumed
+7 E r r o r _ p o r t = 255 − Error_code_G ;
+8 Last_error_code_G = Error_code_G ;
+9 i f ( Error_code_G ! = 0 ) {
+10 Error_tick_count_G = 60000;
+11 } e l s e {
+12 Error_tick_count_G = 0 ;
+13 }
+14 } e l s e {
+15 i f ( Error_tick_count_G ! = 0 ) {
+16 i f ( − − Error_tick_count_G == 0 ) {
+17 Error_code_G = 0 ; // Reset e r r o r code
+18 }
+19 }
+20 }
+21 # e n d i f
+22 }
+Program 1.15: An implementation of the ‘report status’ function
+Page 18 HCMUT - Computer Engineering
+Note that error reporting may be disabled via the main.h header file:
+1 // Comment t h i s l i n e out i f e r r o r r e p o r t i n g i s NOT required
+2 // # d e f i n e SCH_REPORT_ERRORS
+3 //Where e r r o r r e p o r t i n g i s required , the port on which e r r o r codes
+w i l l be d i s p l a y e d
+4 // i s a l s o determined v i a main . h :
+5 # i f d e f SCH_REPORT_ERRORS
+6 // The port on which e r r o r codes w i l l be d i s p l a y e d
+7 // ONLY USED IF ERRORS ARE REPORTED
+8 # d e f i n e E r r o r _ p o r t PORTA
+9 # e n d i f
+Program 1.16: Define a constant to allow errors are reported
+Note that, in this implementation, error codes are reported for 60,000 ticks (1 minute
+at a 1 ms tick rate). The simplest way of displaying these codes is to attach eight
+LEDs (with suitable buffers) to the error port, as discussed in IC DRIVER [page
+134]: Figure 14.3 illustrates one possible approach.
+What does that error code mean? The forms of error reporting discussed here are
+low-level in nature and are primarily intended to assist the developer of the appli-
+cation or a qualified service engineer performing system maintenance. An addi-
+tional user interface may also be required in your application to notify the user of
+errors, in a more user-friendly manner.
+2.3.10 Adding a watchdog
+The basic scheduler presented here does not provide support for a watchdog timer.
+Such support can be useful and is easily added, as follows:
+• Start the watchdog in the scheduler Start function.
+• Refresh the watchdog in the scheduler Update function.
+1 IWDG_HandleTypeDef hiwdg ;
+2 s t a t i c u i n t 3 2 _ t counter_for_watchdog = 0 ;
+3
+4 void MX_IWDG_Init ( void ) {
+5 hiwdg . Instance = IWDG;
+6 hiwdg . I n i t . P r e s c a l e r = IWDG_PRESCALER_32 ;
+7 hiwdg . I n i t . Reload = 4 09 5;
+8 i f ( HAL_IWDG_Init(&hiwdg ) ! = HAL_OK) {
+9 Error_Handler ( ) ;
+10 }
+11 }
+12 void Watchdog_Refresh ( void ) {
+13 HAL_IWDG_Refresh(&hiwdg ) ;
+14 }
+15 unsigned char Is_Watchdog_Reset ( void ) {
+16 i f ( counter_for_watchdog > 3 ) {
+17 r e t u r n 1 ;
+18 }
+Microcontroller Page 19
+19 r e t u r n 0 ;
+20 }
+21 void Watchdog_Counting ( void ) {
+22 counter_for_watchdog ++;
+23 }
+24
+25 void Reset_Watchdog_Counting ( void ) {
+26 counter_for_watchdog = 0 ;
+27 }
+Program 1.17: An implementation of the ‘watchdog’ functions
+2.3.11 Reliability and safety implications
+• Make sure the task array is large enough
+• Take care with function pointers
+• Dealing with task overlap
+Suppose we have two tasks in our application (Task A, Task B). We further
+assume that Task A is to run every second and Task B every three seconds. We
+assume also that each task has a duration of around 0.5 ms.
+Suppose we schedule the tasks as follows (assuming a 1ms tick interval):
+SCH_Add_Task(TaskA, 0, 1000);
+SCH_Add_Task(TaskB, 0, 3000);
+In this case, the two tasks will sometimes be due to execute at the same
+time. On these occasions, both tasks will run, but Task B will always execute
+after Task A. This will mean that if Task A varies in duration, then Task B will
+suffer from ‘jitter’: it will not be called at the correct time when the tasks over-
+lap.
+Alternatively, suppose we schedule the tasks as follows:
+SCH_Add_Task(TaskA, 0, 1000);
+SCH_Add_Task(TaskB, 5, 3000);
+Now, both tasks still run every 1,000 ms and 3,000 ms (respectively), as
+required. However, Task A is explicitly scheduled always to run 5 ms before
+Task B. As a result,Task B will always run on time.
+In many cases, we can avoid all (or most) task overlaps simply by the ju-
+dicious use of the initial task delays.
+2.3.12 Portability
+3 Objectives
+The aim of this lab is to design and implement a cooperate scheduler to accurately
+provide timeouts and trigger activities. You should add a file for the scheduler im-
+plementation and modify the main system call loop to handle timer interrupts.
+Page 20 HCMUT - Computer Engineering
+4 Problem
+- Your system should have at least four functions:
+• void SCH_Update(void):This function will be updated the remaining time of
+each tasks that are added to a queue. It will be called in the interrupt timer,
+for example 10 ms.
+• void SCH_Dispatch_Tasks(void): This function will get the task in the queue
+to run.
+• uint32_t SCH_Add_Task(void (* pFunction)(), uint32_t DELAY, uint32_t PE-
+RIOD): This function is used to add a task to the queue. It should return an
+ID that is corresponding with the added task.
+• uint8_t SCH_Delete_Task(uint32_t taskID): This function is used to delete
+the task based on its ID.
+You should add more functions if you think it will help you to solve this problem.
+Your main program must have 5 tasks running periodically in 0.5 second, 1 second,
+1.5 seconds, 2 seconds, 2.5 seconds.
+5 Demonstration
+You should be able to show some test code that uses all the functions specified in
+the driver interface.
+Specifically set up and demonstrate:
+• A regular 10ms timer tick.
+• Register a timeout to fire a callback every 10ms.
+• Then, print the value returned by get_time every time this callback is re-
+ceived.
+• Note: Your timestamps must be at least accurate to the nearest 10ms.
+• Register another timeout at a different interval in addition to the 500ms run-
+ning concurrently (i.e. demo more than one timeout registered at a time).
+• Before entering the main loop, set up a few calls to SCH_Add_Task. Make sure
+the delay used is long enough such that the loop is entered before these wake
+up. These callbacks should just print out the current timestamp as each delay
+expires.
+Note this is not a complete list. The following designs are considered unsatisfac-
+tory:
+• Only supporting a single timeout registered at a time.
+Microcontroller Page 21
+• Delivering callbacks in the wrong order
+• O(n) searches in the SCH_Update function.
+• Interrupt frequencies greater than 10Hz, if your timer ticks regularly.

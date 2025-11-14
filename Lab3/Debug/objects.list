@@ -1,0 +1,3 @@
+"./Core/Src/display_7seg.o"
+"./Core/Src/fsm_traffic3_4.o"
+"./Core/Src/led_control.o"

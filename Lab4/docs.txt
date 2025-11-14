@@ -1,0 +1,20 @@
+3. Objectives
+    The aim of this lab is to design and implement a cooperate scheduler to accurately
+    provide timeouts and trigger activities. You should add a file for the scheduler im-
+    plementation and modify the main system call loop to handle timer interrupts.
+
+4. Problem
+    - Your system should have at least four functions:
+    • void SCH_Update(void):This function will be updated the remaining time of
+    each tasks that are added to a queue. It will be called in the interrupt timer,
+    for example 10 ms.
+    • void SCH_Dispatch_Tasks(void): This function will get the task in the queue
+    to run.
+    • uint32_t SCH_Add_Task(void (* pFunction)(), uint32_t DELAY, uint32_t PE-
+    RIOD): This function is used to add a task to the queue. It should return an
+    ID that is corresponding with the added task.
+    • uint8_t SCH_Delete_Task(uint32_t taskID): This function is used to delete
+    the task based on its ID.
+    You should add more functions if you think it will help you to solve this problem.
+    Your main program must have 5 tasks running periodically in 0.5 second, 1 second,
+    1.5 seconds, 2 seconds, 2.5 seconds.
