@@ -21,7 +21,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "parser.h"
+#include "uart.h"
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -64,13 +66,19 @@ static void MX_USART2_UART_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-//UART loop-back communication
+//UART receive interrupt callback
 void HAL_UART_RxCpltCallback ( UART_HandleTypeDef * huart ) {
   if ( huart -> Instance == USART2 ) {
-    //HAL_UART_Transmit(&huart2, &temp, 1, 50);
+    // Add received character to buffer
     buffer[index_buffer++] = temp;
-    HAL_UART_Receive_IT(&huart2, &temp, 1);
+    if (index_buffer >= MAX_BUFFER_SIZE) {
+      index_buffer = 0;  // Wrap around if buffer is full
+    }
+    
+    // Set flag to indicate new data available
     buffer_flag = 1;
+    
+    // Re-enable interrupt for next character
     HAL_UART_Receive_IT(&huart2, &temp, 1);
   }
 }
@@ -108,6 +116,15 @@ int main(void)
   MX_ADC1_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+  
+  // Initialize parser and UART communication FSM
+  parser_init();
+  uart_comm_init();
+  
+  // Start ADC in continuous mode
+  HAL_ADC_Start(&hadc1);
+  
+  // Enable UART receive interrupt
   HAL_UART_Receive_IT(&huart2, &temp, 1);
 
   /* USER CODE END 2 */
@@ -118,19 +135,26 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-    // Blink LED_SYS every 500ms
-    HAL_GPIO_TogglePin(_13_GPIO_Port, _13_Pin);
-
-    // UART command parser
+    
+    // Read ADC value continuously
+    ADC_value = HAL_ADC_GetValue(&hadc1);
+    
+    // Process received characters through command parser
     if (buffer_flag == 1) {
-      command_parser_fsm();
+      // Process all characters in buffer
+      for (uint8_t i = 0; i < index_buffer; i++) {
+        command_parser_fsm(buffer[i]);
+      }
+      // Reset buffer
+      index_buffer = 0;
       buffer_flag = 0;
     }
-    uart_communication_fsm();
-
-    ADC_value = HAL_ADC_GetValue (&hadc1);
-    HAL__UART_Transmit (&huart2, (void *) str, sprintf(str, "%d\n", ADC_value), 1000);
-    HAL_Delay(500);
+    
+    // Run UART communication FSM
+    uart_communication_fsm(&huart2, ADC_value);
+    
+    // Small delay to prevent busy-waiting
+    HAL_Delay(10);
 
     /* USER CODE BEGIN 3 */
   }

@@ -1,0 +1,5 @@
+../Core/Src/parser.c:23:6:parser_init	1
+../Core/Src/parser.c:44:6:command_parser_fsm	11
+../Core/Src/parser.c:107:9:is_command_available	1
+../Core/Src/parser.c:115:9:get_command	1
+../Core/Src/parser.c:122:6:clear_command_flag	1

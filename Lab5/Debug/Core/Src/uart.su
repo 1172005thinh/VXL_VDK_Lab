@@ -1,0 +1,4 @@
+../Core/Src/uart.c:22:6:uart_comm_init	4	static
+../Core/Src/uart.c:32:15:get_uart_state	4	static
+../Core/Src/uart.c:44:6:send_adc_packet	56	static
+../Core/Src/uart.c:77:6:uart_communication_fsm	24	static
