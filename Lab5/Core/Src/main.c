@@ -31,7 +31,11 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define MAX_BUFFER_SIZE 30
+ uint8_t temp = 0;
+ uint8_t buffer[MAX_BUFFER_SIZE];
+ uint8_t index_buffer = 0;
+ uint8_t buffer_flag = 0;
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -60,6 +64,16 @@ static void MX_USART2_UART_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+//UART loop-back communication
+void HAL_UART_RxCpltCallback ( UART_HandleTypeDef * huart ) {
+  if ( huart -> Instance == USART2 ) {
+    //HAL_UART_Transmit(&huart2, &temp, 1, 50);
+    buffer[index_buffer++] = temp;
+    HAL_UART_Receive_IT(&huart2, &temp, 1);
+    buffer_flag = 1;
+    HAL_UART_Receive_IT(&huart2, &temp, 1);
+  }
+}
 /* USER CODE END 0 */
 
 /**
@@ -94,14 +108,29 @@ int main(void)
   MX_ADC1_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+  HAL_UART_Receive_IT(&huart2, &temp, 1);
 
   /* USER CODE END 2 */
+  uint32_t ADC_value = 0;
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
     /* USER CODE END WHILE */
+    // Blink LED_SYS every 500ms
+    HAL_GPIO_TogglePin(_13_GPIO_Port, _13_Pin);
+
+    // UART command parser
+    if (buffer_flag == 1) {
+      command_parser_fsm();
+      buffer_flag = 0;
+    }
+    uart_communication_fsm();
+
+    ADC_value = HAL_ADC_GetValue (&hadc1);
+    HAL__UART_Transmit (&huart2, (void *) str, sprintf(str, "%d\n", ADC_value), 1000);
+    HAL_Delay(500);
 
     /* USER CODE BEGIN 3 */
   }
