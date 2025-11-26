@@ -24,6 +24,7 @@ typedef enum {
 /* Global variables */
 extern uint8_t command_flag;       // Flag indicating a command was received
 extern uint8_t command_data;       // The command type (COMMAND_RST or COMMAND_OK)
+extern uint8_t command_error_flag; // Flag indicating an invalid command was entered
 
 /* Function prototypes */
 
@@ -60,5 +61,16 @@ uint8_t get_command(void);
  * @brief Clear the command flag after processing
  */
 void clear_command_flag(void);
+
+/**
+ * @brief Check if an error occurred (invalid command)
+ * @return 1 if error flag is set, 0 otherwise
+ */
+uint8_t is_command_error(void);
+
+/**
+ * @brief Clear the error flag after handling
+ */
+void clear_command_error(void);
 
 #endif /* INC_PARSER_H_ */

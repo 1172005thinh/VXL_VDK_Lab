@@ -24,6 +24,7 @@
 #include "parser.h"
 #include "uart.h"
 #include <stdio.h>
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -69,6 +70,16 @@ static void MX_USART2_UART_Init(void);
 //UART receive interrupt callback
 void HAL_UART_RxCpltCallback ( UART_HandleTypeDef * huart ) {
   if ( huart -> Instance == USART2 ) {
+    // Echo the received character back to terminal
+    HAL_UART_Transmit(&huart2, &temp, 1, 10);
+    
+    // Handle special characters for better terminal display
+    if (temp == '\r') {
+      // Add line feed after carriage return for proper newline
+      uint8_t lf = '\n';
+      HAL_UART_Transmit(&huart2, &lf, 1, 10);
+    }
+    
     // Add received character to buffer
     buffer[index_buffer++] = temp;
     if (index_buffer >= MAX_BUFFER_SIZE) {
@@ -148,6 +159,14 @@ int main(void)
       // Reset buffer
       index_buffer = 0;
       buffer_flag = 0;
+    }
+    
+    // Check for invalid command error
+    if (is_command_error()) {
+      // Send error message to terminal
+      const char* error_msg = "[ERR] Invalid command!\r\n";
+      HAL_UART_Transmit(&huart2, (uint8_t*)error_msg, strlen(error_msg), 100);
+      clear_command_error();
     }
     
     // Run UART communication FSM

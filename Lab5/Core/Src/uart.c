@@ -109,6 +109,10 @@ void uart_communication_fsm(UART_HandleTypeDef *huart, uint32_t adc_value) {
                 // ACK received successfully
                 clear_command_flag();
                 
+                // Send exit confirmation message
+                const char* exit_msg = "[CMD] Exit\r\n";
+                HAL_UART_Transmit(huart, (uint8_t*)exit_msg, 12, 100);
+                
                 // Return to idle state
                 uart_state = UART_IDLE;
             }
