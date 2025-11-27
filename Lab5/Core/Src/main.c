@@ -140,12 +140,20 @@ int main(void)
 
   /* USER CODE END 2 */
   uint32_t ADC_value = 0;
+  uint32_t led_last_toggle = 0;  // Timestamp for LED toggle
+  const uint32_t LED_TOGGLE_INTERVAL = 500;  // 500ms interval
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
     /* USER CODE END WHILE */
+    
+    // Toggle LED every 500ms
+    if (HAL_GetTick() - led_last_toggle >= LED_TOGGLE_INTERVAL) {
+      HAL_GPIO_TogglePin(_13_GPIO_Port, _13_Pin);
+      led_last_toggle = HAL_GetTick();
+    }
     
     // Read ADC value continuously
     ADC_value = HAL_ADC_GetValue(&hadc1);
