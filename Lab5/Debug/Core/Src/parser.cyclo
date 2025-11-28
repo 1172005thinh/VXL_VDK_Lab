@@ -1,7 +1,7 @@
-../Core/Src/parser.c:27:6:parser_init	1
-../Core/Src/parser.c:54:6:command_parser_fsm	16
-../Core/Src/parser.c:138:9:is_command_available	1
-../Core/Src/parser.c:146:9:get_command	1
-../Core/Src/parser.c:153:6:clear_command_flag	1
-../Core/Src/parser.c:162:9:is_command_error	1
-../Core/Src/parser.c:169:6:clear_command_error	1
+../Core/Src/parser.c:25:6:parser_init	1
+../Core/Src/parser.c:49:6:command_parser_fsm	17
+../Core/Src/parser.c:131:9:is_command_available	1
+../Core/Src/parser.c:139:9:get_command	1
+../Core/Src/parser.c:146:6:clear_command_flag	1
+../Core/Src/parser.c:155:9:is_command_error	1
+../Core/Src/parser.c:162:6:clear_command_error	1

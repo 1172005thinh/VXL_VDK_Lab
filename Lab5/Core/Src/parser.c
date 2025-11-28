@@ -12,9 +12,7 @@
 static ParserState parser_state = PARSER_WAIT_START;
 static uint8_t command_buffer[10];  // Buffer to store command characters
 static uint8_t command_index = 0;   // Current position in command buffer
-static uint8_t command_ready = 0;   // Set to 1 when # is received, waiting for ENTER
-static uint8_t pending_command = 0; // Stores pending command type
-static uint8_t invalid_command = 0; // Set to 1 when invalid command detected
+static uint8_t has_input = 0;       // Set to 1 when non-whitespace input detected
 
 /* Public variables */
 uint8_t command_flag = 0;   // Set to 1 when a valid command is received
@@ -29,9 +27,7 @@ void parser_init(void) {
     command_index = 0;
     command_flag = 0;
     command_data = 0;
-    command_ready = 0;
-    pending_command = 0;
-    invalid_command = 0;
+    has_input = 0;
     command_error_flag = 0;
     memset(command_buffer, 0, sizeof(command_buffer));
 }
@@ -42,28 +38,21 @@ void parser_init(void) {
  * 
  * FSM States:
  * - PARSER_WAIT_START: Waits for '!' to indicate start of command
- * - PARSER_READ_COMMAND: Reads command characters (RST or OK)
- * - PARSER_WAIT_END: Waits for '#' to indicate end of command
+ * - PARSER_READ_COMMAND: Reads command characters until '#' is received
  * 
  * Valid commands:
- * - !RST# + ENTER : Request sensor data (sets command_data = COMMAND_RST)
- * - !OK# + ENTER  : Acknowledge reception (sets command_data = COMMAND_OK)
+ * - !RST# : Request sensor data (sets command_data = COMMAND_RST)
+ * - !OK#  : Acknowledge reception (sets command_data = COMMAND_OK)
  * 
- * Note: Command must be followed by ENTER (\r or \n) to execute
+ * Commands execute immediately when '#' is received (no ENTER required)
  */
 void command_parser_fsm(uint8_t c) {
-    // Check for ENTER key (CR or LF) - executes pending command or reports error
+    // Handle ENTER key - check for malformed input
     if (c == '\r' || c == '\n') {
-        if (command_ready) {
-            // Execute the pending valid command
-            command_data = pending_command;
-            command_flag = 1;
-            command_ready = 0;
-            pending_command = 0;
-        } else if (invalid_command) {
-            // Report invalid command error
+        if (has_input) {
+            // Non-whitespace input without proper !CMD# format
             command_error_flag = 1;
-            invalid_command = 0;
+            has_input = 0;
         }
         return;
     }
@@ -74,8 +63,11 @@ void command_parser_fsm(uint8_t c) {
             if (c == '!') {
                 parser_state = PARSER_READ_COMMAND;
                 command_index = 0;
-                command_ready = 0;
+                has_input = 0;
                 memset(command_buffer, 0, sizeof(command_buffer));
+            } else if (c != ' ' && c != '\t') {
+                // Non-whitespace character without '!' start - malformed input
+                has_input = 1;
             }
             break;
 
@@ -85,26 +77,27 @@ void command_parser_fsm(uint8_t c) {
                 // Null-terminate the command string
                 command_buffer[command_index] = '\0';
                 
-                // Check which command was received and store as pending
+                // Check which command was received and execute immediately
                 if (strcmp((char*)command_buffer, "RST") == 0) {
-                    pending_command = COMMAND_RST;
-                    command_ready = 1;  // Wait for ENTER
+                    command_data = COMMAND_RST;
+                    command_flag = 1;
                 } else if (strcmp((char*)command_buffer, "OK") == 0) {
-                    pending_command = COMMAND_OK;
-                    command_ready = 1;  // Wait for ENTER
+                    command_data = COMMAND_OK;
+                    command_flag = 1;
                 } else if (command_index > 0) {
                     // Invalid command detected (has content but not RST or OK)
-                    invalid_command = 1;  // Wait for ENTER to report error
+                    command_error_flag = 1;
                 }
                 
                 // Reset to wait for next command
                 parser_state = PARSER_WAIT_START;
                 command_index = 0;
+                has_input = 0;
             } 
             // Check for unexpected start character (restart parsing)
             else if (c == '!') {
                 command_index = 0;
-                command_ready = 0;
+                has_input = 0;
                 memset(command_buffer, 0, sizeof(command_buffer));
             }
             // Store command character
@@ -114,7 +107,7 @@ void command_parser_fsm(uint8_t c) {
                 // Buffer overflow, reset parser
                 parser_state = PARSER_WAIT_START;
                 command_index = 0;
-                command_ready = 0;
+                has_input = 0;
             }
             break;
 

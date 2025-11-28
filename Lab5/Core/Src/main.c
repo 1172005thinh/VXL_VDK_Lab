@@ -78,6 +78,10 @@ void HAL_UART_RxCpltCallback ( UART_HandleTypeDef * huart ) {
       // Add line feed after carriage return for proper newline
       uint8_t lf = '\n';
       HAL_UART_Transmit(&huart2, &lf, 1, 10);
+    } else if (temp == '#') {
+      // Add newline after # to separate command from response
+      uint8_t newline[] = "\r\n";
+      HAL_UART_Transmit(&huart2, newline, 2, 10);
     }
     
     // Add received character to buffer
